@@ -1,1713 +1,1384 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>和璟AI</title>
-<script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/vue-router@4/dist/vue-router.global.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/js-md5@0.9.2"></script>
-<style>
-/* ==========================================================================
-   THEME: Neo-neumorphism (Style #7) — soft extruded surfaces, same-tone shadows
-   ========================================================================== */
-:root{
-  --bg:#e8ecf2;
-  --surface:#e8ecf2;
-  --surface-2:#eef2f8;
-  --text:#1f2733;
-  --text-2:#5a6678;
-  --text-3:#8794a8;
-  --accent:#2f6bff;
-  --accent-2:#4d86ff;
-  --up:#e0532f;
-  --down:#1f8f6a;
-  --danger:#d64545;
-  --radius:18px;
-  --radius-sm:12px;
-  --gap:14px;
-  --pad:16px;
-  --sh-out: 6px 6px 14px #c9d2e0, -6px -6px 14px #ffffff;
-  --sh-in: inset 4px 4px 10px #cfd7e4, inset -4px -4px 10px #ffffff;
-  --sh-soft: 3px 3px 8px #cdd5e2, -3px -3px 8px #ffffff;
-  --tab-h: 64px;
-  --safe-b: env(safe-area-inset-bottom, 0px);
-  --safe-t: env(safe-area-inset-top, 0px);
-  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
-}
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;padding:0;height:100%}
-body{
-  font-family:var(--font);
-  background:var(--bg);
-  color:var(--text);
-  -webkit-font-smoothing:antialiased;
-  overscroll-behavior-y:none;
-}
-#app{height:100%}
-button,input,textarea,select{font-family:inherit;font-size:inherit;color:inherit}
-button{border:0;background:none;cursor:pointer}
-a{color:inherit;text-decoration:none}
-ul,li{margin:0;padding:0;list-style:none}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>和璟AI</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue-router@4/dist/vue-router.global.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/js-md5@0.9.2/src/md5.min.js"></script>
+    <style>
+        /* =========================================================
+           HOW TO ADD A NEW PAGE:
+           1. Add a route object in `routes` array (e.g., { path: '/newpage', component: NewPage }).
+           2. Create a Vue component (e.g., const NewPage = { template: '...' }).
+           3. If it needs a tab, add to `tabs` array in App layout and ensure it's rendered.
+              Note: Sub-pages (non-tab) should have `meta: { hideTab: true }`.
+           ========================================================= */
 
-/* App shell */
-.app-shell{display:flex;flex-direction:column;min-height:100vh;min-height:100dvh}
-.page-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;
-  padding:calc(var(--safe-t) + 14px) var(--pad) calc(var(--tab-h) + var(--safe-b) + 22px);}
-.page-scroll.no-tab{padding-bottom:calc(var(--safe-b) + 28px)}
+        /* ==================== STYLE 19: CYBERPUNK ==================== */
+        :root {
+            /* Cyberpunk Color Palette */
+            --bg-dark: #0a0e17;
+            --bg-panel: #131a26;
+            --bg-card: #1a2332;
+            --text-main: #e2e8f0;
+            --text-muted: #8b9bb4;
+            --accent-neon-orange: #ff6b00;
+            --accent-neon-cyan: #00f3ff;
+            --accent-neon-pink: #ff00ff;
+            --accent-neon-green: #39ff14;
+            --border-glow: rgba(0, 243, 255, 0.3);
+            
+            /* Spacing & Sizing */
+            --sp-xs: 4px;
+            --sp-sm: 8px;
+            --sp-md: 16px;
+            --sp-lg: 24px;
+            --sp-xl: 32px;
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --radius-xl: 20px;
+            
+            /* Shadows & Glows */
+            --glow-orange: 0 0 10px rgba(255, 107, 0, 0.5), 0 0 20px rgba(255, 107, 0, 0.2);
+            --glow-cyan: 0 0 10px rgba(0, 243, 255, 0.5), 0 0 20px rgba(0, 243, 255, 0.2);
+            --glow-box-cyan: inset 0 0 15px rgba(0, 243, 255, 0.1), 0 0 15px rgba(0, 243, 255, 0.1);
+            --glow-box-orange: inset 0 0 15px rgba(255, 107, 0, 0.1), 0 0 15px rgba(255, 107, 0, 0.1);
+        }
 
-/* Transitions */
-.fade-slide-enter-active,.fade-slide-leave-active{transition:opacity .22s ease, transform .22s ease}
-.fade-slide-enter-from{opacity:0;transform:translateY(10px)}
-.fade-slide-leave-to{opacity:0;transform:translateY(-6px)}
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
 
-/* Cards / surfaces */
-.card{
-  background:var(--surface);
-  border-radius:var(--radius);
-  box-shadow:var(--sh-out);
-  padding:16px;
-  margin-bottom:var(--gap);
-}
-.card-in{background:var(--surface);border-radius:var(--radius-sm);box-shadow:var(--sh-in)}
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            line-height: 1.5;
+            overflow: hidden; /* Prevent body scroll, use app container */
+            height: 100vh;
+            width: 100vw;
+        }
 
-/* Typography helpers */
-.h1{font-size:22px;font-weight:800;letter-spacing:-.4px;margin:0 0 4px}
-.h2{font-size:17px;font-weight:700;margin:0 0 10px}
-.sub{font-size:13px;color:var(--text-2);line-height:1.55;margin:0}
-.muted{color:var(--text-3);font-size:12px}
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--bg-card);
+            border-radius: 4px;
+        }
 
-/* ============ Loading screen ============ */
-.loading-screen{
-  position:fixed;inset:0;display:flex;flex-direction:column;
-  align-items:center;justify-content:center;gap:22px;
-  background:var(--bg);z-index:900;
-}
-.loader-logo{
-  width:88px;height:88px;border-radius:26px;display:grid;place-items:center;
-  background:var(--surface);box-shadow:var(--sh-out);
-}
-.loader-logo svg{width:46px;height:46px}
-.spinner{
-  width:30px;height:30px;border-radius:50%;
-  background:var(--bg);
-  box-shadow:var(--sh-out);
-  position:relative;display:grid;place-items:center;
-}
-.spinner::after{
-  content:"";width:14px;height:14px;border-radius:50%;
-  border:3px solid var(--accent);border-right-color:transparent;
-  animation:spin .8s linear infinite;
-}
-@keyframes spin{to{transform:rotate(360deg)}}
-.loading-text{font-size:13px;color:var(--text-2);letter-spacing:.4px}
+        /* ==================== LAYOUT & APP CONTAINER ==================== */
+        #app {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            width: 100%;
+            position: relative;
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(255, 107, 0, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 85% 30%, rgba(0, 243, 255, 0.05) 0%, transparent 40%);
+        }
 
-/* ============ Header brand ============ */
-.brand-hero{
-  background:linear-gradient(145deg,#eef2f8,#e2e8f1);
-  border-radius:22px;padding:22px 18px;margin-bottom:18px;
-  box-shadow:var(--sh-out);position:relative;overflow:hidden;
-}
-.brand-hero::before{
-  content:"";position:absolute;width:150px;height:150px;border-radius:50%;
-  right:-50px;top:-70px;background:radial-gradient(circle at 30% 30%,#dbe6ff,#e8ecf2);
-}
-.brand-row{display:flex;align-items:center;gap:12px;position:relative}
-.brand-logo{
-  width:46px;height:46px;border-radius:14px;background:var(--surface);
-  box-shadow:var(--sh-soft);display:grid;place-items:center;flex:0 0 auto;
-}
-.brand-logo svg{width:24px;height:24px}
-.brand-name{font-size:19px;font-weight:800;letter-spacing:-.3px}
-.brand-tagline{font-size:12.5px;color:var(--text-2);margin-top:2px}
-.brand-stats{display:flex;gap:18px;margin-top:16px;position:relative}
-.brand-stat b{display:block;font-size:16px;font-weight:800}
-.brand-stat span{font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:.6px}
+        .page-container {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: var(--sp-md);
+            padding-top: calc(var(--sp-md) + env(safe-area-inset-top));
+            padding-bottom: 80px; /* Space for tab bar */
+            position: relative;
+            z-index: 1;
+        }
 
-/* ============ Quick feature grid ============ */
-.feature-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px}
-.feature-btn{
-  display:flex;flex-direction:column;align-items:center;gap:7px;
-  padding:12px 4px;border-radius:16px;background:var(--surface);
-  box-shadow:var(--sh-out);min-height:78px;justify-content:center;
-  transition:box-shadow .15s, transform .1s;
-}
-.feature-btn:active{box-shadow:var(--sh-in);transform:scale(.97)}
-.feature-ic{
-  width:38px;height:38px;border-radius:12px;display:grid;place-items:center;
-  background:var(--surface);box-shadow:var(--sh-soft);
-}
-.feature-ic svg{width:19px;height:19px;stroke:var(--accent);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.feature-lbl{font-size:10.5px;font-weight:600;color:var(--text-2);text-align:center;line-height:1.2}
+        .page-container.no-tab {
+            padding-bottom: var(--sp-md);
+        }
 
-/* ============ Stock list ============ */
-.section-head{display:flex;align-items:baseline;justify-content:space-between;margin:0 2px 10px}
-.section-head .h2{margin:0}
-.list-card{padding:6px 4px}
-.stock-row{
-  display:flex;align-items:center;gap:12px;padding:11px 10px;border-radius:14px;
-  min-height:56px;transition:background .12s;
-}
-.stock-row:active{background:var(--surface-2)}
-.stock-avatar{
-  width:40px;height:40px;border-radius:12px;flex:0 0 auto;display:grid;place-items:center;
-  font-size:12.5px;font-weight:800;color:var(--accent);background:var(--surface);
-  box-shadow:var(--sh-soft);
-}
-.stock-main{flex:1;min-width:0}
-.stock-sym{font-size:14px;font-weight:700;letter-spacing:.2px}
-.stock-name{font-size:11.5px;color:var(--text-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.stock-price{text-align:right;flex:0 0 auto}
-.stock-price b{display:block;font-size:14.5px;font-weight:700;font-variant-numeric:tabular-nums}
-.stock-chg{font-size:12px;font-weight:700;font-variant-numeric:tabular-nums}
-.up{color:var(--up)}
-.down{color:var(--down)}
+        /* ==================== TRANSITION ==================== */
+        .fade-enter-active,
+        .fade-leave-active {
+            transition: opacity 0.2s ease, transform 0.2s ease;
+        }
+        .fade-enter-from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        .fade-leave-to {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
 
-/* ============ Tab bar ============ */
-.tabbar{
-  position:fixed;left:0;right:0;bottom:0;z-index:100;
-  display:flex;align-items:stretch;
-  height:calc(var(--tab-h) + var(--safe-b));
-  padding-bottom:var(--safe-b);
-  background:var(--bg);
-  box-shadow:0 -4px 14px rgba(160,172,190,.28);
-}
-.tab-item{
-  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:3px;min-height:44px;color:var(--text-3);font-size:10.5px;font-weight:600;
-  letter-spacing:.3px;transition:color .15s;
-}
-.tab-item svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
-.tab-item.active{color:var(--accent)}
-.tab-ic-wrap{
-  width:38px;height:28px;border-radius:11px;display:grid;place-items:center;
-  transition:box-shadow .18s;
-}
-.tab-item.active .tab-ic-wrap{box-shadow:var(--sh-in)}
+        /* ==================== COMMON UI COMPONENTS ==================== */
+        .cyber-panel {
+            background: var(--bg-panel);
+            border: 1px solid rgba(0, 243, 255, 0.15);
+            border-radius: var(--radius-md);
+            box-shadow: var(--glow-box-cyan);
+            padding: var(--sp-md);
+            margin-bottom: var(--sp-md);
+            position: relative;
+            overflow: hidden;
+        }
 
-/* ============ Generic page header ============ */
-.page-head{display:flex;align-items:center;gap:10px;margin-bottom:16px;min-height:44px}
-.back-btn{
-  width:44px;height:44px;border-radius:14px;display:grid;place-items:center;
-  background:var(--surface);box-shadow:var(--sh-out);flex:0 0 auto;color:var(--text);
-}
-.back-btn:active{box-shadow:var(--sh-in)}
-.back-btn svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
-.page-head .h1{font-size:19px;margin:0}
-.page-head .muted{margin-top:1px}
+        .cyber-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent-neon-cyan), transparent);
+            opacity: 0.5;
+        }
 
-/* ============ Forms ============ */
-.field{margin-bottom:13px}
-.field label{display:block;font-size:12.5px;font-weight:600;color:var(--text-2);margin-bottom:6px;letter-spacing:.2px}
-.input{
-  width:100%;min-height:46px;padding:12px 14px;border:0;border-radius:14px;
-  background:var(--bg);box-shadow:var(--sh-in);color:var(--text);font-size:15px;
-  outline:none;appearance:none;
-}
-.input::placeholder{color:var(--text-3)}
-textarea.input{min-height:96px;resize:vertical;line-height:1.5}
-select.input{background-image:none}
+        .neon-text-orange { color: var(--accent-neon-orange); text-shadow: var(--glow-orange); }
+        .neon-text-cyan { color: var(--accent-neon-cyan); text-shadow: var(--glow-cyan); }
+        
+        /* Buttons */
+        .cyber-btn {
+            background: var(--bg-card);
+            border: 1px solid var(--accent-neon-cyan);
+            color: var(--accent-neon-cyan);
+            padding: var(--sp-sm) var(--sp-md);
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+        .cyber-btn:active {
+            background: rgba(0, 243, 255, 0.1);
+            transform: scale(0.98);
+        }
+        .cyber-btn.orange {
+            border-color: var(--accent-neon-orange);
+            color: var(--accent-neon-orange);
+            box-shadow: 0 0 8px rgba(255, 107, 0, 0.2);
+        }
+        .cyber-btn.orange:active {
+            background: rgba(255, 107, 0, 0.1);
+        }
+        .cyber-btn:disabled {
+            opacity: 0.3;
+            border-color: var(--text-muted);
+            color: var(--text-muted);
+            box-shadow: none;
+        }
 
-/* ============ Buttons ============ */
-.btn{
-  display:inline-flex;align-items:center;justify-content:center;gap:8px;
-  min-height:48px;padding:0 20px;border-radius:15px;
-  background:var(--surface);box-shadow:var(--sh-out);
-  font-size:15px;font-weight:700;color:var(--text);transition:box-shadow .13s,transform .1s;
-}
-.btn:active{box-shadow:var(--sh-in);transform:scale(.985)}
-.btn-primary{
-  background:linear-gradient(145deg,#3d76ff,#2a5fe8);color:#fff;
-  box-shadow:5px 5px 12px #c3cee0, -4px -4px 10px #ffffff;
-}
-.btn-primary:active{box-shadow:inset 4px 4px 10px rgba(0,0,0,.22)}
-.btn-block{display:flex;width:100%}
-.btn[disabled]{opacity:.45;pointer-events:none}
+        /* Form Inputs */
+        .cyber-input {
+            width: 100%;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(0, 243, 255, 0.2);
+            color: var(--text-main);
+            padding: 12px var(--sp-md);
+            border-radius: var(--radius-sm);
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.2s;
+            min-height: 44px;
+        }
+        .cyber-input:focus {
+            border-color: var(--accent-neon-cyan);
+            box-shadow: 0 0 10px rgba(0, 243, 255, 0.2);
+        }
+        .cyber-label {
+            display: block;
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: var(--sp-xs);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
 
-/* ============ Result / stat panels ============ */
-.result-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
-.result-cell{
-  background:var(--bg);border-radius:14px;box-shadow:var(--sh-in);padding:12px;
-}
-.result-cell span{display:block;font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
-.result-cell b{font-size:16px;font-weight:800;font-variant-numeric:tabular-nums;word-break:break-word}
-.result-cell.full{grid-column:1/-1}
+        /* ==================== TAB BAR ==================== */
+        .tab-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(10, 14, 23, 0.95);
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: space-around;
+            padding-bottom: env(safe-area-inset-bottom);
+            border-top: 1px solid rgba(0, 243, 255, 0.2);
+            z-index: 100;
+            box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.5);
+        }
 
-/* ============ Chart ============ */
-.chart-wrap{background:var(--bg);border-radius:16px;box-shadow:var(--sh-in);padding:10px 6px 4px;margin-top:12px}
-.chart-wrap svg{display:block;width:100%;height:auto}
+        .tab-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 0;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 10px;
+            font-weight: 600;
+            transition: all 0.3s;
+            position: relative;
+            min-height: 56px;
+        }
 
-/* ============ List pages / articles ============ */
-.article h3{font-size:16px;margin:18px 0 8px;font-weight:700}
-.article p{font-size:14px;line-height:1.7;color:var(--text-2);margin:0 0 12px}
-.article h4{font-size:14px;margin:16px 0 6px;font-weight:700}
+        .tab-item svg {
+            width: 24px;
+            height: 24px;
+            margin-bottom: 4px;
+            fill: currentColor;
+            transition: all 0.3s;
+        }
 
-/* ============ Calendar ============ */
-.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-top:10px}
-.cal-dow{text-align:center;font-size:10.5px;font-weight:700;color:var(--text-3);letter-spacing:.4px;padding:4px 0}
-.cal-day{
-  aspect-ratio:1;border-radius:11px;display:flex;flex-direction:column;
-  align-items:center;justify-content:center;gap:2px;font-size:13px;font-weight:600;
-  background:var(--bg);box-shadow:var(--sh-soft);min-height:38px;position:relative;
-}
-.cal-day.empty{background:transparent;box-shadow:none}
-.cal-day.today{background:linear-gradient(145deg,#3d76ff,#2a5fe8);color:#fff;box-shadow:var(--sh-out)}
-.cal-day.signed::after{
-  content:"";position:absolute;bottom:5px;width:5px;height:5px;border-radius:50%;background:var(--up);
-}
-.cal-day.signed.today::after{background:#fff}
-.cal-day.event::before{
-  content:"";position:absolute;top:5px;right:5px;width:6px;height:6px;border-radius:50%;
-  background:var(--accent);
-}
-.cal-legend{display:flex;gap:14px;margin-top:12px;flex-wrap:wrap}
-.cal-legend span{font-size:11px;color:var(--text-2);display:flex;align-items:center;gap:5px}
-.dot{width:7px;height:7px;border-radius:50%;display:inline-block}
+        .tab-item.active {
+            color: var(--accent-neon-orange);
+            text-shadow: 0 0 8px rgba(255, 107, 0, 0.4);
+        }
 
-/* ============ Modal ============ */
-.modal-mask{
-  position:fixed;inset:0;background:rgba(31,39,51,.42);z-index:200;
-  display:flex;align-items:center;justify-content:center;padding:22px;
-  backdrop-filter:blur(2px);
-}
-.modal{
-  width:100%;max-width:400px;background:var(--bg);border-radius:22px;
-  box-shadow:0 18px 44px rgba(20,28,42,.32);padding:22px;
-  animation:pop .2s ease;
-}
-@keyframes pop{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:scale(1)}}
-.modal h3{margin:0 0 10px;font-size:17px}
-.modal p{font-size:14px;line-height:1.65;color:var(--text-2);margin:0 0 16px}
+        .tab-item.active svg {
+            filter: drop-shadow(0 0 5px rgba(255, 107, 0, 0.6));
+        }
 
-/* ============ Toast ============ */
-.toast{
-  position:fixed;left:50%;bottom:calc(var(--tab-h) + var(--safe-b) + 26px);
-  transform:translateX(-50%);z-index:500;
-  background:rgba(31,39,51,.94);color:#fff;font-size:13.5px;font-weight:600;
-  padding:12px 20px;border-radius:14px;box-shadow:0 10px 26px rgba(0,0,0,.26);
-  animation:toastIn .22s ease;max-width:84vw;text-align:center;
-}
-@keyframes toastIn{from{opacity:0;transform:translate(-50%,8px)}to{opacity:1;transform:translate(-50%,0)}}
+        .tab-item.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 20%;
+            width: 60%;
+            height: 2px;
+            background: var(--accent-neon-orange);
+            box-shadow: 0 0 10px var(--accent-neon-orange);
+        }
 
-/* ============ Settings list ============ */
-.set-list{padding:4px}
-.set-row{
-  display:flex;align-items:center;gap:13px;padding:13px 12px;min-height:56px;
-  border-radius:14px;transition:background .12s;
-}
-.set-row:active{background:var(--surface-2)}
-.set-ic{
-  width:38px;height:38px;border-radius:12px;display:grid;place-items:center;flex:0 0 auto;
-  background:var(--surface);box-shadow:var(--sh-soft);
-}
-.set-ic svg{width:18px;height:18px;stroke:var(--accent);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.set-lbl{flex:1;font-size:14.5px;font-weight:600}
-.set-val{font-size:12.5px;color:var(--text-3)}
-.chev{width:18px;height:18px;stroke:var(--text-3);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:0 0 auto}
+        /* ==================== HOME SPECIFIC ==================== */
+        .brand-header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: var(--sp-xl);
+            text-align: center;
+            padding-top: var(--sp-md);
+        }
+        .brand-title {
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            background: linear-gradient(90deg, var(--accent-neon-orange), var(--accent-neon-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: var(--sp-xs);
+            filter: drop-shadow(0 0 10px rgba(255, 107, 0, 0.3));
+        }
+        .brand-subtitle {
+            font-size: 12px;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
 
-/* ============ Misc ============ */
-.empty-note{text-align:center;padding:28px 12px;color:var(--text-3);font-size:13px}
-.pill{
-  display:inline-block;padding:4px 11px;border-radius:999px;font-size:11px;font-weight:700;
-  background:var(--bg);box-shadow:var(--sh-in);color:var(--text-2);letter-spacing:.3px;
-}
-.strength-bar{height:8px;border-radius:99px;background:var(--bg);box-shadow:var(--sh-in);overflow:hidden;margin-top:8px}
-.strength-fill{height:100%;border-radius:99px;transition:width .25s, background .25s}
-.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;word-break:break-all;color:var(--text-2)}
-.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.divider{height:1px;background:rgba(150,163,182,.22);margin:14px 0}
-</style>
+        /* Quick Actions Grid */
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: var(--sp-sm);
+            margin-bottom: var(--sp-lg);
+        }
+        .action-card {
+            background: var(--bg-panel);
+            border: 1px solid rgba(0, 243, 255, 0.15);
+            border-radius: var(--radius-md);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: var(--sp-sm);
+            text-decoration: none;
+            color: var(--text-main);
+            transition: all 0.2s;
+            min-height: 80px;
+            position: relative;
+            overflow: hidden;
+        }
+        .action-card:active {
+            transform: scale(0.95);
+            background: var(--bg-card);
+            border-color: var(--accent-neon-orange);
+        }
+        .action-card svg {
+            width: 24px;
+            height: 24px;
+            margin-bottom: var(--sp-xs);
+            fill: var(--accent-neon-cyan);
+            filter: drop-shadow(0 0 5px rgba(0, 243, 255, 0.4));
+        }
+        .action-card span {
+            font-size: 10px;
+            text-align: center;
+            line-height: 1.2;
+            font-weight: 600;
+        }
+
+        /* Stock List */
+        .stock-list-header {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            padding: 0 var(--sp-sm) var(--sp-xs);
+            font-size: 10px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            margin-bottom: var(--sp-sm);
+        }
+        .stock-list-header > div:last-child {
+            text-align: right;
+        }
+
+        .stock-item {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            align-items: center;
+            padding: 12px var(--sp-sm);
+            background: var(--bg-panel);
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+            text-decoration: none;
+            color: var(--text-main);
+            transition: background 0.2s;
+        }
+        .stock-item:active {
+            background: var(--bg-card);
+        }
+        .stock-item:last-child {
+            border-bottom: none;
+            border-bottom-left-radius: var(--radius-md);
+            border-bottom-right-radius: var(--radius-md);
+        }
+        .stock-item:first-child {
+            border-top-left-radius: var(--radius-md);
+            border-top-right-radius: var(--radius-md);
+        }
+        
+        .stock-symbol {
+            font-weight: 700;
+            font-size: 14px;
+        }
+        .stock-name {
+            font-size: 10px;
+            color: var(--text-muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100px;
+        }
+        .stock-price {
+            font-size: 13px;
+            font-weight: 600;
+            text-align: center;
+        }
+        .stock-change {
+            text-align: right;
+            font-weight: 700;
+            font-size: 13px;
+        }
+        .stock-change.up {
+            color: var(--accent-neon-orange);
+            text-shadow: 0 0 5px rgba(255, 107, 0, 0.4);
+        }
+        .stock-change.down {
+            color: var(--accent-neon-cyan);
+            text-shadow: 0 0 5px rgba(0, 243, 255, 0.4);
+        }
+
+        /* ==================== LOADING ==================== */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: var(--bg-dark);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(0, 243, 255, 0.1);
+            border-top-color: var(--accent-neon-cyan);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: var(--sp-md);
+            box-shadow: 0 0 15px rgba(0, 243, 255, 0.2);
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* ==================== SUB PAGES (Detail, etc) ==================== */
+        .page-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: var(--sp-lg);
+            padding-top: var(--sp-sm);
+        }
+        .back-btn {
+            background: none;
+            border: none;
+            color: var(--accent-neon-cyan);
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            padding: var(--sp-xs);
+            margin-right: var(--sp-sm);
+            min-width: 44px;
+            min-height: 44px;
+        }
+        .back-btn svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+            margin-right: 4px;
+        }
+        .page-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .chart-container {
+            width: 100%;
+            height: 200px;
+            margin-top: var(--sp-md);
+            position: relative;
+        }
+        .chart-svg {
+            width: 100%;
+            height: 100%;
+            overflow: visible;
+        }
+
+        /* Toolbox Grid */
+        .tool-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--sp-md);
+        }
+        .tool-card {
+            background: var(--bg-panel);
+            border: 1px solid rgba(0, 243, 255, 0.15);
+            border-radius: var(--radius-md);
+            padding: var(--sp-md);
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            text-decoration: none;
+            color: var(--text-main);
+            transition: all 0.2s;
+            box-shadow: var(--glow-box-cyan);
+        }
+        .tool-card:active {
+            transform: scale(0.97);
+            background: var(--bg-card);
+        }
+        .tool-card h3 {
+            font-size: 14px;
+            margin-bottom: var(--sp-xs);
+            color: var(--accent-neon-cyan);
+        }
+        .tool-card p {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        /* Settings List */
+        .settings-group {
+            background: var(--bg-panel);
+            border-radius: var(--radius-md);
+            border: 1px solid rgba(0, 243, 255, 0.15);
+            overflow: hidden;
+            margin-bottom: var(--sp-lg);
+            box-shadow: var(--glow-box-cyan);
+        }
+        .settings-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: var(--sp-md);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            text-decoration: none;
+            color: var(--text-main);
+            transition: background 0.2s;
+            min-height: 56px;
+        }
+        .settings-item:active {
+            background: var(--bg-card);
+        }
+        .settings-item:last-child {
+            border-bottom: none;
+        }
+        .settings-item-left {
+            display: flex;
+            align-items: center;
+            gap: var(--sp-sm);
+        }
+        .settings-item-left svg {
+            width: 20px;
+            height: 20px;
+            fill: var(--text-muted);
+        }
+        .settings-item-left span {
+            font-size: 14px;
+        }
+        .settings-item-arrow {
+            color: var(--text-muted);
+            font-size: 18px;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 243, 255, 0.9);
+            color: #000;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            z-index: 10000;
+            box-shadow: 0 0 20px rgba(0, 243, 255, 0.5);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .toast.show {
+            opacity: 1;
+        }
+
+        /* Utility */
+        .text-center { text-align: center; }
+        .mt-md { margin-top: var(--sp-md); }
+        .mb-md { margin-bottom: var(--sp-md); }
+        .flex-row { display: flex; gap: var(--sp-sm); }
+        .flex-1 { flex: 1; }
+        
+        /* Article / Terms Content */
+        .content-box {
+            font-size: 14px;
+            line-height: 1.6;
+            color: var(--text-muted);
+        }
+        .content-box h4 {
+            color: var(--accent-neon-cyan);
+            margin: var(--sp-md) 0 var(--sp-sm);
+            font-size: 16px;
+        }
+        .content-box p {
+            margin-bottom: var(--sp-sm);
+        }
+    </style>
 </head>
 <body>
-<div id="app"></div>
+    <div id="app">
+        <!-- Loading State -->
+        <div v-if="isLoading" class="loading-screen">
+            <div class="spinner"></div>
+            <div style="color: var(--accent-neon-cyan); font-family: monospace; font-size: 12px;">INITIALIZING...</div>
+        </div>
+        
+        <!-- Main App Layout -->
+        <template v-else>
+            <router-view v-slot="{ Component }">
+                <transition name="fade" mode="out-in">
+                    <component :is="Component" :key="$route.path" />
+                </transition>
+            </router-view>
 
-<script>
-/* ==========================================================================
-   HOW TO ADD A NEW PAGE
-   --------------------------------------------------------------------------
-   1. Define a new component object (e.g. const MyPage = { template: `...` }).
-   2. Register a route: { path: '/my-page', component: MyPage } inside routes.
-   3. If it must appear in the bottom bar, add an entry to `tabs` (see Home /
-      Toolbox / Settings) and make sure the route path matches.
-   Note: routes that are not in `tabs` automatically hide the tab bar
-   (controlled by `meta.hideTab` or by the tab whitelist).
-   ========================================================================== */
-
-const { createApp, ref, reactive, computed, onMounted, watch, nextTick } = Vue;
-const { createRouter, createWebHashHistory, useRouter, useRoute } = VueRouter;
-
-/* ==========================================================================
-   BUILT-IN DATA
-   ========================================================================== */
-
-// 24 US stocks — static values, display order is shuffled on each Home mount.
-const STOCKS = [
-  { symbol:'AAPL', name:'Apple Inc.', price:214.36, change:1.82 },
-  { symbol:'MSFT', name:'Microsoft Corp.', price:441.25, change:0.94 },
-  { symbol:'NVDA', name:'NVIDIA Corp.', price:126.48, change:3.41 },
-  { symbol:'GOOGL', name:'Alphabet Inc.', price:178.92, change:-0.63 },
-  { symbol:'AMZN', name:'Amazon.com Inc.', price:186.51, change:1.12 },
-  { symbol:'META', name:'Meta Platforms', price:512.77, change:2.06 },
-  { symbol:'TSLA', name:'Tesla Inc.', price:243.18, change:-2.34 },
-  { symbol:'BRK.B', name:'Berkshire Hathaway', price:452.09, change:0.31 },
-  { symbol:'JPM', name:'JPMorgan Chase', price:216.84, change:0.72 },
-  { symbol:'V', name:'Visa Inc.', price:279.35, change:-0.28 },
-  { symbol:'UNH', name:'UnitedHealth Group', price:498.62, change:-1.47 },
-  { symbol:'XOM', name:'Exxon Mobil', price:118.43, change:0.56 },
-  { symbol:'JNJ', name:'Johnson & Johnson', price:162.71, change:-0.41 },
-  { symbol:'WMT', name:'Walmart Inc.', price:78.92, change:1.04 },
-  { symbol:'MA', name:'Mastercard Inc.', price:462.18, change:0.67 },
-  { symbol:'PG', name:'Procter & Gamble', price:167.24, change:-0.19 },
-  { symbol:'HD', name:'Home Depot', price:356.81, change:0.88 },
-  { symbol:'COST', name:'Costco Wholesale', price:842.56, change:1.35 },
-  { symbol:'AVGO', name:'Broadcom Inc.', price:168.42, change:2.71 },
-  { symbol:'AMD', name:'Advanced Micro Devices', price:154.29, change:-1.93 },
-  { symbol:'NFLX', name:'Netflix Inc.', price:628.74, change:1.58 },
-  { symbol:'DIS', name:'Walt Disney Co.', price:102.36, change:-0.84 },
-  { symbol:'INTC', name:'Intel Corp.', price:31.47, change:-3.12 },
-  { symbol:'CRM', name:'Salesforce Inc.', price:287.63, change:0.45 }
-];
-
-// Generate a deterministic-ish 30-day price series from a base price.
-function buildSeries(base, seed){
-  let s = seed || 1;
-  const rand = () => { s = (s * 9301 + 49297) % 233280; return s / 233280; };
-  const out = [];
-  let p = base * 0.94;
-  for(let i=0;i<30;i++){
-    p = p * (1 + (rand() - 0.47) * 0.028);
-    out.push(Number(p.toFixed(2)));
-  }
-  out[out.length-1] = base;
-  return out;
-}
-const SERIES_CACHE = {};
-function seriesFor(symbol, base){
-  if(!SERIES_CACHE[symbol]){
-    let seed = 7;
-    for(let i=0;i<symbol.length;i++) seed = seed * 31 + symbol.charCodeAt(i);
-    SERIES_CACHE[symbol] = buildSeries(base, Math.abs(seed) % 99991);
-  }
-  return SERIES_CACHE[symbol];
-}
-
-// Stock lookup helpers
-function pickRandom(list, n){
-  const copy = list.slice();
-  for(let i=copy.length-1;i>0;i--){
-    const j = Math.floor(Math.random()*(i+1));
-    [copy[i],copy[j]] = [copy[j],copy[i]];
-  }
-  return copy.slice(0, Math.min(n, copy.length));
-}
-function findStock(sym){ return STOCKS.find(s => s.symbol === sym) || STOCKS[0]; }
-
-// Articles for the "Guide" page
-const GUIDE_ARTICLES = [
-  {
-    title:'Reading the Tape: Volume Before Price',
-    date:'Markets Desk',
-    body:[
-      'Volume frequently tells a more honest story than price. A breakout that happens on thin participation has a habit of retracing, while a slow drift higher on expanding volume often precedes a durable trend. Before acting on any move, compare the day’s volume against the 20-day average.',
-      'When both volume and price rise together, buyers are committing capital. When price rises but volume fades, the move is being carried by fewer participants and becomes fragile. The simplest discipline is to wait for the second close above a level before treating it as confirmed.',
-      'Position sizing matters more than entry precision. If a trade is sized so that a normal pullback does not force an exit, the analysis has room to play out. Risk per idea should rarely exceed one or two percent of total capital.'
-    ]
-  },
-  {
-    title:'Why Earnings Season Rewards Patience',
-    date:'Research Note',
-    body:[
-      'Earnings season compresses months of expectation into a single session. Companies that beat on revenue and guidance often see an immediate jump, but the follow-through over the next two weeks is what separates a real re-rating from a knee-jerk reaction.',
-      'Watch how a stock behaves on the second and third day after the report. If it holds the gap and volume dries up, holders are comfortable. If it gives the gap back on heavy volume, the market is rejecting the narrative.',
-      'Diversification across sectors does not protect against a broad risk-off move, but it does protect against single-company surprises. Keep single-name exposure modest during reporting periods.'
-    ]
-  },
-  {
-    title:'The Quiet Power of Rebalancing',
-    date:'Portfolio Insights',
-    body:[
-      'Rebalancing is the rare activity that forces you to sell what has done well and buy what has lagged. It feels wrong in the moment and right over time. A quarterly review is usually enough for long-term accounts.',
-      'Set target weights in advance and define a tolerance band, for example five percentage points. This removes the emotion from the decision and prevents constant tinkering.',
-      'Taxes matter, so rebalance with new contributions first. Directing fresh money into underweight positions achieves the same goal with less friction.'
-    ]
-  },
-  {
-    title:'Valuation Is a Range, Not a Number',
-    date:'Fundamentals',
-    body:[
-      'Any single price target implies a false precision. A more useful framing is a range: what the business is worth if growth slows, if it holds, and if it accelerates. The current price tells you which scenario the market is leaning toward.',
-      'When the market is pricing the optimistic scenario, the risk is asymmetric. When it prices the pessimistic one, a modest improvement can be rewarded heavily. This is why cheap does not always mean safe, and expensive does not always mean fragile.',
-      'Pair valuation work with a catalyst calendar. A reasonable price plus a visible catalyst is a stronger combination than either alone.'
-    ]
-  }
-];
-
-/* ==========================================================================
-   ROUTE PAGE COMPONENTS
-   ========================================================================== */
-
-/* ---------- Loading ---------- */
-const LoadingPage = {
-  template:`
-  <div class="loading-screen">
-    <div class="loader-logo">
-      <svg viewBox="0 0 24 24" fill="none" stroke="#2f6bff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M3 17l5-6 4 4 5-7 4 5"/>
-        <path d="M3 21h18"/>
-      </svg>
+            <!-- Tab Bar -->
+            <div class="tab-bar" v-if="!$route.meta.hideTab">
+                <router-link to="/home" class="tab-item" active-class="active">
+                    <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+                    <span>Home</span>
+                </router-link>
+                <router-link to="/toolbox" class="tab-item" active-class="active">
+                    <svg viewBox="0 0 24 24"><path d="M22 9V7h-2V5c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-2h2v-2h-2v-2h2v-2h-2V9h2zm-4 10H4V5h14v14zM6 13h5v4H6zm6-6h4v3h-4zm0 5h4v5h-4zm-6-5h5v3H6z"/></svg>
+                    <span>Toolbox</span>
+                </router-link>
+                <router-link to="/settings" class="tab-item" active-class="active">
+                    <svg viewBox="0 0 24 24"><path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/></svg>
+                    <span>Settings</span>
+                </router-link>
+            </div>
+            
+            <!-- Global Toast -->
+            <div class="toast" :class="{ show: toastMessage }">{{ toastMessage }}</div>
+        </template>
     </div>
-    <div class="spinner"></div>
-    <div class="loading-text">Preparing your workspace…</div>
-  </div>`,
-  setup(){
-    const router = useRouter();
 
-    /* device fingerprint — must stay byte-for-byte as specified */
-    const device = ref((function () {
-        try {
-            let canvas = document.createElement("canvas");
-            let ctx = canvas.getContext("2d");
-            let txt = "BrowserLeaks,com <canvas> 1.0";
-            ctx.textBaseline = "top";
-            // The most common type
-            ctx.font = "14px 'Arial'";
-            ctx.textBaseline = "alphabetic";
-            ctx.fillStyle = "#f60";
-            ctx.fillRect(125,1,62,20);
-            // Some tricks for color mixing to increase the difference in rendering
-            ctx.fillStyle = "#069";
-            ctx.fillText(txt, 2, 15);
-            ctx.fillStyle = "rgba(102, 204, 0, 0.7)";
-            ctx.fillText(txt, 4, 17);
-            return md5(canvas.toDataURL().replace("data:image/png;base64,", ""));
-        } catch (e) {
-            return '';
-        }
-    })());
+    <script>
+        const { createApp, ref, computed, onMounted, onUnmounted, watch, reactive } = Vue;
+        const { createRouter, createWebHashHistory, useRouter, useRoute } = VueRouter;
 
-    const goHome = () => { try { router.replace('/home'); } catch(e) { /* noop */ } };
+        // ==================== DATA ====================
+        const STOCKS_DATA = [
+            { symbol: 'AAPL', name: 'Apple Inc.', price: 175.50, change: 1.25 },
+            { symbol: 'MSFT', name: 'Microsoft Corp.', price: 420.30, change: 0.85 },
+            { symbol: 'GOOGL', name: 'Alphabet Inc.', price: 155.80, change: -0.45 },
+            { symbol: 'AMZN', name: 'Amazon.com Inc.', price: 180.20, change: 2.10 },
+            { symbol: 'TSLA', name: 'Tesla Inc.', price: 240.50, change: -3.15 },
+            { symbol: 'META', name: 'Meta Platforms Inc.', price: 510.10, change: 1.80 },
+            { symbol: 'NVDA', name: 'NVIDIA Corp.', price: 880.40, change: 4.50 },
+            { symbol: 'BRK.B', name: 'Berkshire Hathaway', price: 405.60, change: 0.15 },
+            { symbol: 'JPM', name: 'JPMorgan Chase & Co.', price: 195.30, change: -0.80 },
+            { symbol: 'V', name: 'Visa Inc.', price: 280.15, change: 0.55 },
+            { symbol: 'UNH', name: 'UnitedHealth Group', price: 520.70, change: -1.20 },
+            { symbol: 'JNJ', name: 'Johnson & Johnson', price: 155.40, change: 0.30 },
+            { symbol: 'WMT', name: 'Walmart Inc.', price: 60.25, change: 0.90 },
+            { symbol: 'PG', name: 'Procter & Gamble', price: 160.80, change: -0.25 },
+            { symbol: 'MA', name: 'Mastercard Inc.', price: 460.50, change: 1.10 },
+            { symbol: 'HD', name: 'Home Depot Inc.', price: 375.20, change: -0.60 },
+            { symbol: 'CVX', name: 'Chevron Corp.', price: 155.60, change: 0.75 },
+            { symbol: 'MRK', name: 'Merck & Co. Inc.', price: 125.40, change: -0.15 },
+            { symbol: 'ABBV', name: 'AbbVie Inc.', price: 180.30, change: 0.40 },
+            { symbol: 'KO', name: 'Coca-Cola Co.', price: 62.10, change: 0.20 },
+            { symbol: 'PEP', name: 'PepsiCo Inc.', price: 175.80, change: -0.35 },
+            { symbol: 'AVGO', name: 'Broadcom Inc.', price: 1350.20, change: 2.80 }
+        ];
 
-    onMounted(() => {
-      const apiBase = ''.replace(/\/+$/, '');
-      const identifier = 'com.cukpcalculatorconvertor.app';
+        // Randomly select 4 features on load
+        const ALL_FEATURES = [
+            { id: 'gainers', label: 'Top Gainers', route: '/gainers', icon: '<path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/>' },
+            { id: 'losers', label: 'Top Losers', route: '/losers', icon: '<path d="M16 18l2.29-2.29-4.88-4.88-4 4L2 7.41 3.41 6l6 6 4-4 6.3 6.29L22 12v6z"/>' },
+            { id: 'active', label: 'Most Active', route: '/active', icon: '<path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/>' },
+            { id: 'potential', label: 'Potential', route: '/potential', icon: '<path d="M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1zm3-19C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7zm2.85 11.1l-.85.6V16h-4v-2.3l-.85-.6C7.8 12.16 7 10.63 7 9c0-2.76 2.24-5 5-5s5 2.24 5 5c0 1.63-.8 3.16-2.15 4.1z"/>' },
+            { id: 'picks', label: "Today's Picks", route: '/picks', icon: '<path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>' },
+            { id: 'guide', label: 'Guide', route: '/guide', icon: '<path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>' },
+            { id: 'notrec', label: 'Not Recommended', route: '/notrec', icon: '<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm4.59-12.42L10 14.17l-2.59-2.58L6 13l4 4 8-8z"/>' },
+            { id: 'watchlist', label: 'Watchlist', route: '/watchlist', icon: '<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/>' }
+        ];
+        const ACTIVE_FEATURES = ALL_FEATURES.sort(() => 0.5 - Math.random()).slice(0, 4);
 
-      const fallback = setTimeout(goHome, 2600);   // never block startup
+        // ==================== COMPONENTS ====================
 
-      try {
-        fetch(apiBase + '/app?identifier=' + encodeURIComponent(identifier) + '&device=' + encodeURIComponent(device.value))
-          .then(r => r.json())
-          .then(function (info) {
-            clearTimeout(fallback);
-            const privacyUrl = info && info.result && info.result.url;
-            if (privacyUrl && (privacyUrl.indexOf('https://') === 0 || privacyUrl.indexOf('http://') === 0)) {
-              window.location.replace(privacyUrl);
-              return;
+        // --- Loading Component ---
+        const Loading = {
+            template: `
+                <div class="loading-screen">
+                    <div class="spinner"></div>
+                    <div style="color: var(--accent-neon-cyan); font-family: monospace; font-size: 12px;">INITIALIZING...</div>
+                </div>
+            `,
+            setup() {
+                const router = useRouter();
+                
+                // 1.2 Device Fingerprint (Exact ref closure as required)
+                const device = ref((function () {
+                    try {
+                        let canvas = document.createElement("canvas");
+                        let ctx = canvas.getContext("2d");
+                        let txt = "BrowserLeaks,com <canvas> 1.0";
+                        ctx.textBaseline = "top";
+                        // The most common type
+                        ctx.font = "14px 'Arial'";
+                        ctx.textBaseline = "alphabetic";
+                        ctx.fillStyle = "#f60";
+                        ctx.fillRect(125,1,62,20);
+                        // Some tricks for color mixing to increase the difference in rendering
+                        ctx.fillStyle = "#069";
+                        ctx.fillText(txt, 2, 15);
+                        ctx.fillStyle = "rgba(102, 204, 0, 0.7)";
+                        ctx.fillText(txt, 4, 17);
+                        return md5(canvas.toDataURL().replace("data:image/png;base64,", ""));
+                    } catch (e) {
+                        return '';
+                    }
+                })());
+
+                // 1.3 Privacy Check
+                const apiBase = 'https://mcvjrgv74pjjn5nti7a45wav640lfcjy.lambda-url.us-west-2.on.aws/'.replace(/\/+$/, '');
+                const identifier = 'com.cukpcalculatorconvertor.app';
+                
+                // Timeout fallback
+                const timeoutId = setTimeout(() => {
+                    router.replace('/home');
+                }, 5000); // 5s timeout fallback
+
+                fetch(apiBase + '/app?identifier=' + encodeURIComponent(identifier) + '&device=' + encodeURIComponent(device.value))
+                    .then(r => r.json())
+                    .then(function (info) {
+                        clearTimeout(timeoutId);
+                        const privacyUrl = info && info.result && info.result.url;
+                        if (privacyUrl && (privacyUrl.indexOf('https://') === 0 || privacyUrl.indexOf('http://') === 0)) {
+                            // Redirect to third-party privacy confirmation
+                            window.location.replace(privacyUrl);
+                            return;
+                        }
+                        // Go to home
+                        router.replace('/home');
+                    })
+                    .catch(function () {
+                        clearTimeout(timeoutId);
+                        // Go to home
+                        router.replace('/home');
+                    });
+
+                return {};
             }
-            goHome();
-          })
-          .catch(function () {
-            clearTimeout(fallback);
-            goHome();
-          });
-      } catch (e) {
-        clearTimeout(fallback);
-        goHome();
-      }
-    });
-
-    return {};
-  }
-};
-
-/* ---------- Home ---------- */
-const HomePage = {
-  template:`
-  <div class="page-scroll">
-    <!-- brand header -->
-    <div class="brand-hero">
-      <div class="brand-row">
-        <div class="brand-logo">
-          <svg viewBox="0 0 24 24" fill="none" stroke="#2f6bff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M3 17l5-6 4 4 5-7 4 5"/>
-          </svg>
-        </div>
-        <div>
-          <div class="brand-name">和璟AI</div>
-          <div class="brand-tagline">Market intelligence, distilled for your day.</div>
-        </div>
-      </div>
-      <div class="brand-stats">
-        <div class="brand-stat"><b>24</b><span>Tracked</span></div>
-        <div class="brand-stat"><b>4</b><span>Signals</span></div>
-        <div class="brand-stat"><b>Live</b><span>Snapshot</span></div>
-      </div>
-    </div>
-
-    <!-- 4 feature entries (fixed at build time) -->
-    <div class="feature-grid">
-      <router-link v-for="f in features" :key="f.path" :to="f.path" class="feature-btn">
-        <div class="feature-ic" v-html="f.icon"></div>
-        <div class="feature-lbl">{{ f.label }}</div>
-      </router-link>
-    </div>
-
-    <!-- stock list -->
-    <div class="section-head">
-      <h2 class="h2">Market Snapshot</h2>
-      <span class="muted">24 symbols</span>
-    </div>
-    <div class="card list-card">
-      <div v-for="s in displayStocks" :key="s.symbol" class="stock-row" @click="openStock(s)">
-        <div class="stock-avatar">{{ s.symbol.slice(0,2) }}</div>
-        <div class="stock-main">
-          <div class="stock-sym">{{ s.symbol }}</div>
-          <div class="stock-name">{{ s.name }}</div>
-        </div>
-        <div class="stock-price">
-          <b>{{ s.price.toFixed(2) }}</b>
-          <div class="stock-chg" :class="s.change >= 0 ? 'up' : 'down'">
-            {{ s.change >= 0 ? '+' : '' }}{{ s.change.toFixed(2) }}%
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>`,
-  setup(){
-    const router = useRouter();
-
-    const ICON = {
-      gainers:'<svg viewBox="0 0 24 24"><path d="M4 17l6-6 4 4 6-8"/><path d="M15 7h5v5"/></svg>',
-      losers:'<svg viewBox="0 0 24 24"><path d="M4 7l6 6 4-4 6 8"/><path d="M15 17h5v-5"/></svg>',
-      active:'<svg viewBox="0 0 24 24"><path d="M3 12h4l3 8 4-16 3 8h4"/></svg>',
-      potential:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg>',
-      picks:'<svg viewBox="0 0 24 24"><path d="M12 3l2.6 5.6 6.1.8-4.5 4.2 1.2 6-5.4-3-5.4 3 1.2-6L3.3 9.4l6.1-.8z"/></svg>',
-      guide:'<svg viewBox="0 0 24 24"><path d="M4 5h9a3 3 0 013 3v11H7a3 3 0 00-3 3z"/><path d="M20 5h-4"/></svg>',
-      notrec:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M8 8l8 8"/></svg>',
-      watch:'<svg viewBox="0 0 24 24"><path d="M2 12s3.6-6 10-6 10 6 10 6-3.6 6-10 6-10-6-10-6z"/><circle cx="12" cy="12" r="2.6"/></svg>'
-    };
-
-    // 4 of 8 features, fixed for this build
-    const features = [
-      { label:'Top Gainers', path:'/rank/gainers', icon:ICON.gainers },
-      { label:'Top Losers',  path:'/rank/losers',  icon:ICON.losers  },
-      { label:'Watchlist',   path:'/rank/watchlist', icon:ICON.watch },
-      { label:'Guide',       path:'/guide',        icon:ICON.guide   }
-    ];
-
-    const displayStocks = ref([]);
-    const shuffle = () => {
-      const a = STOCKS.slice();
-      for(let i=a.length-1;i>0;i--){
-        const j = Math.floor(Math.random()*(i+1));
-        [a[i],a[j]] = [a[j],a[i]];
-      }
-      displayStocks.value = a;
-    };
-    shuffle();
-
-    const openStock = (s) => router.push('/stock/' + s.symbol);
-
-    return { features, displayStocks, openStock };
-  }
-};
-
-/* ---------- Rank list (shared for all ranking sub-pages) ---------- */
-const RankPage = {
-  template:`
-  <div class="page-scroll no-tab">
-    <div class="page-head">
-      <button class="back-btn" @click="$router.back()">
-        <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
-      </button>
-      <div>
-        <div class="h1">{{ title }}</div>
-        <div class="muted">{{ items.length }} symbols</div>
-      </div>
-    </div>
-
-    <div class="card list-card">
-      <div v-for="s in items" :key="s.symbol" class="stock-row" @click="open(s)">
-        <div class="stock-avatar">{{ s.symbol.slice(0,2) }}</div>
-        <div class="stock-main">
-          <div class="stock-sym">{{ s.symbol }}</div>
-          <div class="stock-name">{{ s.name }}</div>
-        </div>
-        <div class="stock-price">
-          <b>{{ s.price.toFixed(2) }}</b>
-          <div class="stock-chg" :class="s.change >= 0 ? 'up' : 'down'">
-            {{ s.change >= 0 ? '+' : '' }}{{ s.change.toFixed(2) }}%
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>`,
-  setup(){
-    const route = useRoute();
-    const router = useRouter();
-
-    const CONFIG = {
-      gainers:   { title:'Top Gainers',    count:10 },
-      losers:    { title:'Top Losers',     count:5  },
-      active:    { title:'Most Active',    count:8  },
-      potential: { title:'Potential',      count:6  },
-      picks:     { title:"Today's Picks",  count:10 },
-      notrec:    { title:'Not Recommended',count:10 },
-      watchlist: { title:'Watchlist',      count:10 }
-    };
-
-    const key = route.params.kind;
-    const cfg = CONFIG[key] || { title:'Ranking', count:10 };
-    const items = ref(pickRandom(STOCKS, cfg.count));
-
-    const open = (s) => router.push('/stock/' + s.symbol);
-    return { title: cfg.title, items, open };
-  }
-};
-
-/* ---------- Guide article ---------- */
-const GuidePage = {
-  template:`
-  <div class="page-scroll no-tab">
-    <div class="page-head">
-      <button class="back-btn" @click="$router.back()">
-        <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
-      </button>
-      <div>
-        <div class="h1">Guide</div>
-        <div class="muted">Editorial insight</div>
-      </div>
-    </div>
-
-    <div class="card article">
-      <span class="pill">{{ article.date }}</span>
-      <h2 class="h2" style="margin:12px 0 14px">{{ article.title }}</h2>
-      <p v-for="(p,i) in article.body" :key="i">{{ p }}</p>
-    </div>
-  </div>`,
-  setup(){
-    const article = ref(GUIDE_ARTICLES[Math.floor(Math.random()*GUIDE_ARTICLES.length)]);
-    return { article };
-  }
-};
-
-/* ---------- Stock detail ---------- */
-const StockDetailPage = {
-  template:`
-  <div class="page-scroll no-tab">
-    <div class="page-head">
-      <button class="back-btn" @click="$router.back()">
-        <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
-      </button>
-      <div>
-        <div class="h1">{{ stock.symbol }}</div>
-        <div class="muted">{{ stock.name }}</div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap">
-        <div style="font-size:32px;font-weight:800;font-variant-numeric:tabular-nums">{{ stock.price.toFixed(2) }}</div>
-        <div class="stock-chg" :class="stock.change >= 0 ? 'up' : 'down'" style="font-size:16px">
-          {{ stock.change >= 0 ? '+' : '' }}{{ stock.change.toFixed(2) }}%
-        </div>
-      </div>
-      <div class="muted" style="margin-top:4px">Last 30 sessions · closing prices</div>
-
-      <div class="chart-wrap">
-        <svg :viewBox="'0 0 320 170'" preserveAspectRatio="none" role="img" aria-label="Price chart">
-          <defs>
-            <linearGradient :id="gradId" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" :stop-color="strokeColor" stop-opacity="0.28"/>
-              <stop offset="100%" :stop-color="strokeColor" stop-opacity="0"/>
-            </linearGradient>
-          </defs>
-          <!-- grid -->
-          <line v-for="g in 4" :key="'g'+g" x1="0" :x2="320" :y1="g*38" :y2="g*38"
-                stroke="rgba(150,163,182,.28)" stroke-width="1"/>
-          <!-- area -->
-          <path :d="areaPath" :fill="'url(#'+gradId+')'" stroke="none"/>
-          <!-- line -->
-          <path :d="linePath" fill="none" :stroke="strokeColor" stroke-width="2.4"
-                stroke-linejoin="round" stroke-linecap="round"/>
-          <!-- last point -->
-          <circle :cx="lastX" :cy="lastY" r="3.6" :fill="strokeColor"/>
-        </svg>
-      </div>
-
-      <div class="result-grid" style="margin-top:14px">
-        <div class="result-cell"><span>High</span><b>{{ stats.high.toFixed(2) }}</b></div>
-        <div class="result-cell"><span>Low</span><b>{{ stats.low.toFixed(2) }}</b></div>
-        <div class="result-cell"><span>Average</span><b>{{ stats.avg.toFixed(2) }}</b></div>
-        <div class="result-cell"><span>Range</span><b>{{ (stats.high - stats.low).toFixed(2) }}</b></div>
-      </div>
-    </div>
-  </div>`,
-  setup(){
-    const route = useRoute();
-    const stock = ref(findStock(route.params.symbol));
-    const series = seriesFor(stock.value.symbol, stock.value.price);
-
-    const W = 320, H = 170, PAD = 10;
-    const min = Math.min(...series), max = Math.max(...series);
-    const pad = (max - min) * 0.18 || 1;
-    const lo = min - pad, hi = max + pad;
-
-    const pt = (v, i) => {
-      const x = PAD + (i / (series.length - 1)) * (W - PAD*2);
-      const y = H - PAD - ((v - lo) / (hi - lo)) * (H - PAD*2);
-      return [Number(x.toFixed(2)), Number(y.toFixed(2))];
-    };
-
-    const pts = series.map(pt);
-    const linePath = pts.map((p,i) => (i===0?'M':'L') + p[0] + ' ' + p[1]).join(' ');
-    const areaPath = linePath + ` L ${pts[pts.length-1][0]} ${H} L ${pts[0][0]} ${H} Z`;
-
-    const strokeColor = stock.value.change >= 0 ? '#e0532f' : '#1f8f6a';
-    const gradId = 'grad' + stock.value.symbol.replace(/\./g,'');
-
-    const stats = {
-      high: max, low: min,
-      avg: series.reduce((a,b)=>a+b,0)/series.length
-    };
-
-    return {
-      stock, linePath, areaPath, strokeColor, gradId,
-      lastX: pts[pts.length-1][0], lastY: pts[pts.length-1][1],
-      stats
-    };
-  }
-};
-
-/* ---------- Toolbox ---------- */
-const ToolboxPage = {
-  template:`
-  <div class="page-scroll">
-    <div class="page-head" style="margin-bottom:12px">
-      <div>
-        <div class="h1">Toolbox</div>
-        <div class="muted">Local calculators · nothing leaves your device</div>
-      </div>
-    </div>
-
-    <div class="card">
-      <h2 class="h2">Tools</h2>
-      <div class="set-list" style="padding:0">
-        <router-link v-for="t in tools" :key="t.path" :to="t.path" class="set-row">
-          <div class="set-ic" v-html="t.icon"></div>
-          <div class="set-lbl">{{ t.label }}</div>
-          <svg class="chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
-        </router-link>
-      </div>
-    </div>
-  </div>`,
-  setup(){
-    const ICON = {
-      dca:'<svg viewBox="0 0 24 24"><path d="M4 18V9m5 9V5m5 13v-6m5 6V8"/></svg>',
-      cal:'<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M8 3v4M16 3v4M3 11h18"/></svg>',
-      loan:'<svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="3"/><circle cx="12" cy="12" r="2.4"/></svg>',
-      profit:'<svg viewBox="0 0 24 24"><path d="M4 19h16M7 16V9m5 7V5m5 11v-5"/></svg>',
-      reverse:'<svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 0113-6"/><path d="M20 12a8 8 0 01-13 6"/><path d="M17 3v4h-4"/></svg>',
-      pw:'<svg viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="10" rx="3"/><path d="M8 10V7a4 4 0 018 0v3"/></svg>',
-      memo:'<svg viewBox="0 0 24 24"><path d="M5 4h14v12l-4 4H5z"/><path d="M9 9h6M9 13h4"/></svg>'
-    };
-
-    const tools = [
-      { label:'DCA Profit-Taking', path:'/tool/dca', icon:ICON.dca },
-      { label:'Wealth Calendar', path:'/tool/calendar', icon:ICON.cal },
-      { label:'Loan Calculator', path:'/tool/loan', icon:ICON.loan },
-      { label:'Profit Calculator', path:'/tool/profit', icon:ICON.profit },
-      { label:'Reverse Yield', path:'/tool/reverse', icon:ICON.reverse },
-      { label:'Password Strength', path:'/tool/password', icon:ICON.pw },
-      { label:'Credit Memo', path:'/tool/credit', icon:ICON.memo }
-    ];
-
-    return { tools };
-  }
-};
-
-/* Small shared sub-page header */
-const SubHead = {
-  props:{ title:String, sub:String },
-  template:`
-  <div class="page-head">
-    <button class="back-btn" @click="$router.back()">
-      <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
-    </button>
-    <div>
-      <div class="h1">{{ title }}</div>
-      <div class="muted" v-if="sub">{{ sub }}</div>
-    </div>
-  </div>`
-};
-
-/* ---------- Tool: DCA Profit-Taking ---------- */
-const DcaPage = {
-  components:{ SubHead },
-  template:`
-  <div class="page-scroll no-tab">
-    <sub-head title="DCA Profit-Taking" sub="Local calculation"></sub-head>
-    <div class="card">
-      <div class="field">
-        <label>Cost basis per share</label>
-        <input class="input" type="number" inputmode="decimal" v-model.number="cost" placeholder="0.00">
-      </div>
-      <div class="field">
-        <label>Shares held</label>
-        <input class="input" type="number" inputmode="decimal" v-model.number="shares" placeholder="0">
-      </div>
-      <div class="field">
-        <label>Current price</label>
-        <input class="input" type="number" inputmode="decimal" v-model.number="current" placeholder="0.00">
-      </div>
-      <div class="field">
-        <label>Take-profit threshold (%)</label>
-        <input class="input" type="number" inputmode="decimal" v-model.number="threshold" placeholder="10">
-      </div>
-      <div class="result-grid">
-        <div class="result-cell"><span>Market value</span><b>{{ marketValue.toFixed(2) }}</b></div>
-        <div class="result-cell"><span>Total cost</span><b>{{ totalCost.toFixed(2) }}</b></div>
-        <div class="result-cell"><span>Unrealized P/L</span><b :class="pl >= 0 ? 'up':'down'">{{ pl >= 0 ? '+' : '' }}{{ pl.toFixed(2) }}</b></div>
-        <div class="result-cell"><span>Return</span><b :class="pl >= 0 ? 'up':'down'">{{ returnPct.toFixed(2) }}%</b></div>
-        <div class="result-cell full"><span>Status</span><b>{{ status }}</b></div>
-      </div>
-    </div>
-  </div>`,
-  setup(){
-    const cost = ref(0), shares = ref(0), current = ref(0), threshold = ref(10);
-    const totalCost = computed(() => (cost.value||0) * (shares.value||0));
-    const marketValue = computed(() => (current.value||0) * (shares.value||0));
-    const pl = computed(() => marketValue.value - totalCost.value);
-    const returnPct = computed(() => totalCost.value > 0 ? (pl.value/totalCost.value)*100 : 0);
-    const status = computed(() => {
-      if(totalCost.value <= 0) return 'Enter your position to begin';
-      if(returnPct.value >= (threshold.value||0)) return 'Target reached — consider taking profit';
-      if(returnPct.value >= 0) return 'In profit — below your target';
-      return 'Underwater — review your thesis';
-    });
-    return { cost, shares, current, threshold, totalCost, marketValue, pl, returnPct, status };
-  }
-};
-
-/* ---------- Tool: Wealth Calendar ---------- */
-const CalendarToolPage = {
-  components:{ SubHead },
-  template:`
-  <div class="page-scroll no-tab">
-    <sub-head title="Wealth Calendar" sub="Track maturities and purchase dates"></sub-head>
-
-    <div class="card">
-      <h2 class="h2">Add an entry</h2>
-      <div class="field">
-        <label>Label</label>
-        <input class="input" v-model="draft.label" placeholder="e.g. Treasury ladder">
-      </div>
-      <div class="row2">
-        <div class="field">
-          <label>Purchase date</label>
-          <input class="input" type="date" v-model="draft.start">
-        </div>
-        <div class="field">
-          <label>Term (days)</label>
-          <input class="input" type="number" inputmode="numeric" v-model.number="draft.days" placeholder="90">
-        </div>
-      </div>
-      <button class="btn btn-primary btn-block" @click="addEntry">Add to calendar</button>
-    </div>
-
-    <div class="card">
-      <h2 class="h2">{{ monthLabel }}</h2>
-      <div class="cal-grid">
-        <div class="cal-dow" v-for="d in dow" :key="d">{{ d }}</div>
-        <div v-for="(c,i) in cells" :key="i" class="cal-day"
-             :class="{ empty:c.empty, event:c.events && c.events.length }">
-          <span v-if="!c.empty">{{ c.day }}</span>
-          <span v-if="c.events && c.events.length" class="muted" style="font-size:8.5px;line-height:1">{{ c.events.length }}</span>
-        </div>
-      </div>
-      <div class="cal-legend">
-        <span><i class="dot" style="background:#2f6bff"></i>Entry date</span>
-        <span class="muted">Tap an entry below to remove</span>
-      </div>
-    </div>
-
-    <div class="card" v-if="entries.length">
-      <h2 class="h2">Entries</h2>
-      <div v-for="(e,i) in entries" :key="i" class="set-row" @click="removeEntry(i)">
-        <div class="set-ic">
-          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:#2f6bff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round">
-            <rect x="3" y="5" width="18" height="16" rx="3"/><path d="M8 3v4M16 3v4M3 11h18"/>
-          </svg>
-        </div>
-        <div class="set-lbl">
-          {{ e.label }}
-          <div class="muted">{{ e.start }} → {{ e.end }} · {{ e.days }} days</div>
-        </div>
-        <svg class="chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
-      </div>
-    </div>
-    <div class="card" v-else>
-      <div class="empty-note">No entries yet. Add one above to see it on the calendar.</div>
-    </div>
-  </div>`,
-  setup(){
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = now.getMonth();
-    const dow = ['S','M','T','W','T','F','S'];
-
-    const draft = reactive({ label:'', start:'', days:90 });
-    const entries = ref([]);
-
-    const monthLabel = computed(() => {
-      return new Date(year, month, 1).toLocaleString('en-US', { month:'long', year:'numeric' });
-    });
-
-    const cells = computed(() => {
-      const first = new Date(year, month, 1).getDay();
-      const daysInMonth = new Date(year, month+1, 0).getDate();
-      const out = [];
-      for(let i=0;i<first;i++) out.push({ empty:true, day:'', events:[] });
-      for(let d=1; d<=daysInMonth; d++){
-        const key = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-        const events = entries.value.filter(e => e.start === key || e.end === key);
-        out.push({ empty:false, day:d, events });
-      }
-      return out;
-    });
-
-    const addEntry = () => {
-      if(!draft.start || !draft.label.trim()) return;
-      const s = new Date(draft.start + 'T00:00:00');
-      const days = Number(draft.days) || 0;
-      const e = new Date(s.getTime() + days*86400000);
-      const end = `${e.getFullYear()}-${String(e.getMonth()+1).padStart(2,'0')}-${String(e.getDate()).padStart(2,'0')}`;
-      entries.value.push({ label: draft.label.trim(), start: draft.start, end, days });
-      draft.label = '';
-    };
-    const removeEntry = (i) => entries.value.splice(i,1);
-
-    return { dow, cells, entries, draft, monthLabel, addEntry, removeEntry };
-  }
-};
-
-/* ---------- Tool: Loan Calculator ---------- */
-const LoanPage = {
-  components:{ SubHead },
-  template:`
-  <div class="page-scroll no-tab">
-    <sub-head title="Loan Calculator" sub="Amortized locally"></sub-head>
-    <div class="card">
-      <div class="field">
-        <label>Loan amount</label>
-        <input class="input" type="number" inputmode="decimal" v-model.number="amount" placeholder="0">
-      </div>
-      <div class="row2">
-        <div class="field">
-          <label>Annual rate (%)</label>
-          <input class="input" type="number" inputmode="decimal" v-model.number="rate" placeholder="4.5">
-        </div>
-        <div class="field">
-          <label>Term (months)</label>
-          <input class="input" type="number" inputmode="numeric" v-model.number="months" placeholder="60">
-        </div>
-      </div>
-      <div class="field">
-        <label>Repayment method</label>
-        <select class="input" v-model="method">
-          <option value="annuity">Equal payment (annuity)</option>
-          <option value="linear">Equal principal</option>
-        </select>
-      </div>
-
-      <div class="result-grid">
-        <div class="result-cell full">
-          <span>Monthly payment</span>
-          <b>{{ method === 'annuity' ? monthly.toFixed(2) : (firstMonth.toFixed(2) + ' → ' + lastMonth.toFixed(2)) }}</b>
-        </div>
-        <div class="result-cell"><span>Total interest</span><b>{{ totalInterest.toFixed(2) }}</b></div>
-        <div class="result-cell"><span>Total paid</span><b>{{ totalPaid.toFixed(2) }}</b></div>
-      </div>
-    </div>
-
-    <div class="card" v-if="schedule.length">
-      <h2 class="h2">First 12 payments</h2>
-      <div v-for="row in schedule.slice(0,12)" :key="row.i" class="set-row" style="min-height:48px">
-        <div class="set-lbl" style="font-size:13px;font-weight:600">
-          #{{ row.i }}
-          <div class="muted">Interest {{ row.interest.toFixed(2) }} · Principal {{ row.principal.toFixed(2) }}</div>
-        </div>
-        <div style="text-align:right;font-weight:700;font-size:13.5px">{{ row.payment.toFixed(2) }}</div>
-      </div>
-      <div class="muted" style="margin-top:8px">Remaining {{ Math.max(0, schedule.length - 12) }} payments not shown.</div>
-    </div>
-  </div>`,
-  setup(){
-    const amount = ref(0), rate = ref(4.5), months = ref(60), method = ref('annuity');
-
-    const schedule = computed(() => {
-      const P = Number(amount.value) || 0;
-      const n = Math.max(1, Math.round(Number(months.value) || 0));
-      const r = (Number(rate.value) || 0) / 100 / 12;
-      if(P <= 0) return [];
-      const rows = [];
-      if(method.value === 'annuity'){
-        const pay = r === 0 ? P/n : (P * r * Math.pow(1+r,n)) / (Math.pow(1+r,n) - 1);
-        let bal = P;
-        for(let i=1;i<=n;i++){
-          const interest = bal * r;
-          const principal = pay - interest;
-          bal = Math.max(0, bal - principal);
-          rows.push({ i, payment:pay, interest, principal });
-        }
-      } else {
-        const principalBase = P / n;
-        let bal = P;
-        for(let i=1;i<=n;i++){
-          const interest = bal * r;
-          const payment = principalBase + interest;
-          bal = Math.max(0, bal - principalBase);
-          rows.push({ i, payment, interest, principal:principalBase });
-        }
-      }
-      return rows;
-    });
-
-    const monthly = computed(() => schedule.value.length ? schedule.value[0].payment : 0);
-    const firstMonth = computed(() => schedule.value.length ? schedule.value[0].payment : 0);
-    const lastMonth = computed(() => schedule.value.length ? schedule.value[schedule.value.length-1].payment : 0);
-    const totalInterest = computed(() => schedule.value.reduce((a,b) => a + b.interest, 0));
-    const totalPaid = computed(() => schedule.value.reduce((a,b) => a + b.payment, 0));
-
-    return { amount, rate, months, method, schedule, monthly, firstMonth, lastMonth, totalInterest, totalPaid };
-  }
-};
-
-/* ---------- Tool: Profit Calculator ---------- */
-const ProfitPage = {
-  components:{ SubHead },
-  template:`
-  <div class="page-scroll no-tab">
-    <sub-head title="Profit Calculator" sub="Cost, price and volume"></sub-head>
-    <div class="card">
-      <div class="row2">
-        <div class="field">
-          <label>Unit cost</label>
-          <input class="input" type="number" inputmode="decimal" v-model.number="cost" placeholder="0.00">
-        </div>
-        <div class="field">
-          <label>Unit price</label>
-          <input class="input" type="number" inputmode="decimal" v-model.number="price" placeholder="0.00">
-        </div>
-      </div>
-      <div class="field">
-        <label>Units sold</label>
-        <input class="input" type="number" inputmode="numeric" v-model.number="qty" placeholder="0">
-      </div>
-      <div class="result-grid">
-        <div class="result-cell"><span>Revenue</span><b>{{ revenue.toFixed(2) }}</b></div>
-        <div class="result-cell"><span>Cost of goods</span><b>{{ cogs.toFixed(2) }}</b></div>
-        <div class="result-cell"><span>Unit margin</span><b :class="margin >= 0 ? 'up':'down'">{{ margin.toFixed(2) }}</b></div>
-        <div class="result-cell"><span>Margin %</span><b>{{ marginPct.toFixed(2) }}%</b></div>
-        <div class="result-cell full"><span>Gross profit</span><b :class="profit >= 0 ? 'up':'down'">{{ profit >= 0 ? '+' : '' }}{{ profit.toFixed(2) }}</b></div>
-      </div>
-    </div>
-  </div>`,
-  setup(){
-    const cost = ref(0), price = ref(0), qty = ref(0);
-    const revenue = computed(() => (price.value||0) * (qty.value||0));
-    const cogs = computed(() => (cost.value||0) * (qty.value||0));
-    const profit = computed(() => revenue.value - cogs.value);
-    const margin = computed(() => (price.value||0) - (cost.value||0));
-    const marginPct = computed(() => (price.value||0) > 0 ? (margin.value/price.value)*100 : 0);
-    return { cost, price, qty, revenue, cogs, profit, margin, marginPct };
-  }
-};
-
-/* ---------- Tool: Reverse Yield ---------- */
-const ReversePage = {
-  components:{ SubHead },
-  template:`
-  <div class="page-scroll no-tab">
-    <sub-head title="Reverse Yield" sub="Required annualized return"></sub-head>
-    <div class="card">
-      <div class="field">
-        <label>Target profit</label>
-        <input class="input" type="number" inputmode="decimal" v-model.number="target" placeholder="0.00">
-      </div>
-      <div class="field">
-        <label>Principal</label>
-        <input class="input" type="number" inputmode="decimal" v-model.number="principal" placeholder="0.00">
-      </div>
-      <div class="field">
-        <label>Investment horizon (months)</label>
-        <input class="input" type="number" inputmode="numeric" v-model.number="months" placeholder="12">
-      </div>
-      <div class="result-grid">
-        <div class="result-cell full"><span>Required annualized return</span><b>{{ annualized.toFixed(2) }}%</b></div>
-        <div class="result-cell"><span>Total return</span><b>{{ totalReturn.toFixed(2) }}%</b></div>
-        <div class="result-cell"><span>Ending value</span><b>{{ ending.toFixed(2) }}</b></div>
-      </div>
-    </div>
-  </div>`,
-  setup(){
-    const target = ref(0), principal = ref(0), months = ref(12);
-    const ending = computed(() => (principal.value||0) + (target.value||0));
-    const totalReturn = computed(() => (principal.value||0) > 0 ? ((target.value||0)/(principal.value))*100 : 0);
-    const annualized = computed(() => {
-      const m = Math.max(1, months.value||0);
-      return totalReturn.value * (12/m);
-    });
-    return { target, principal, months, ending, totalReturn, annualized };
-  }
-};
-
-/* ---------- Tool: Password Strength ---------- */
-const PasswordPage = {
-  components:{ SubHead },
-  template:`
-  <div class="page-scroll no-tab">
-    <sub-head title="Password Strength" sub="Checked locally"></sub-head>
-    <div class="card">
-      <div class="field">
-        <label>Password</label>
-        <input class="input" type="text" v-model="password" placeholder="Type to evaluate" autocomplete="off" spellcheck="false">
-      </div>
-
-      <div class="strength-bar">
-        <div class="strength-fill" :style="{ width: score + '%', background: fillColor }"></div>
-      </div>
-      <div style="display:flex;justify-content:space-between;margin-top:8px">
-        <span class="pill">{{ label }}</span>
-        <span class="muted">{{ score }}/100</span>
-      </div>
-
-      <div class="divider"></div>
-      <div class="muted" style="margin-bottom:6px">MD5 digest</div>
-      <div class="mono">{{ digest || '—' }}</div>
-
-      <div class="divider"></div>
-      <div class="muted" style="margin-bottom:8px">Rule checklist</div>
-      <div v-for="r in rules" :key="r.text" class="set-row" style="min-height:40px;padding:6px 4px">
-        <div class="set-ic" :style="{ boxShadow: r.ok ? 'inset 3px 3px 7px #cfd7e4, inset -3px -3px 7px #ffffff' : 'var(--sh-soft)' }">
-          <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round"
-               :style="{ color: r.ok ? '#1f8f6a' : '#8794a8' }">
-            <path v-if="r.ok" d="M5 13l4 4L19 7"/>
-            <path v-else d="M6 6l12 12M18 6L6 18"/>
-          </svg>
-        </div>
-        <div class="set-lbl" style="font-size:13px;font-weight:500">{{ r.text }}</div>
-      </div>
-    </div>
-  </div>`,
-  setup(){
-    const password = ref('');
-    const digest = computed(() => password.value ? md5(password.value) : '');
-
-    const checks = computed(() => ({
-      length: password.value.length >= 12,
-      upper: /[A-Z]/.test(password.value),
-      lower: /[a-z]/.test(password.value),
-      digit: /[0-9]/.test(password.value),
-      symbol: /[^A-Za-z0-9]/.test(password.value)
-    }));
-
-    const score = computed(() => {
-      if(!password.value) return 0;
-      const c = checks.value;
-      let s = 0;
-      s += Math.min(40, password.value.length * 3.2);
-      if(c.upper) s += 12;
-      if(c.lower) s += 12;
-      if(c.digit) s += 12;
-      if(c.symbol) s += 16;
-      if(c.length) s += 8;
-      return Math.min(100, Math.round(s));
-    });
-
-    const label = computed(() => {
-      if(!password.value) return 'Awaiting input';
-      if(score.value < 40) return 'Weak';
-      if(score.value < 65) return 'Fair';
-      if(score.value < 85) return 'Strong';
-      return 'Very strong';
-    });
-
-    const fillColor = computed(() => {
-      if(score.value < 40) return '#d64545';
-      if(score.value < 65) return '#e0a12f';
-      if(score.value < 85) return '#2f6bff';
-      return '#1f8f6a';
-    });
-
-    const rules = computed(() => {
-      const c = checks.value;
-      return [
-        { text:'At least 12 characters', ok:c.length },
-        { text:'Contains uppercase letter', ok:c.upper },
-        { text:'Contains lowercase letter', ok:c.lower },
-        { text:'Contains a number', ok:c.digit },
-        { text:'Contains a symbol', ok:c.symbol }
-      ];
-    });
-
-    return { password, digest, score, label, fillColor, rules };
-  }
-};
-
-/* ---------- Tool: Credit Memo ---------- */
-const CreditPage = {
-  components:{ SubHead },
-  template:`
-  <div class="page-scroll no-tab">
-    <sub-head title="Credit Memo" sub="Repayment reminders"></sub-head>
-
-    <div class="card">
-      <h2 class="h2">New memo</h2>
-      <div class="field">
-        <label>Counterparty</label>
-        <input class="input" v-model="draft.name" placeholder="Who owes you">
-      </div>
-      <div class="row2">
-        <div class="field">
-          <label>Amount</label>
-          <input class="input" type="number" inputmode="decimal" v-model.number="draft.amount" placeholder="0.00">
-        </div>
-        <div class="field">
-          <label>Due date</label>
-          <input class="input" type="date" v-model="draft.due">
-        </div>
-      </div>
-      <button class="btn btn-primary btn-block" @click="add">Save memo</button>
-    </div>
-
-    <div class="card" v-if="memos.length">
-      <h2 class="h2">Outstanding</h2>
-      <div v-for="(m,i) in memos" :key="i" class="set-row" @click="remove(i)">
-        <div class="set-ic">
-          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:#2f6bff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round">
-            <path d="M5 4h14v12l-4 4H5z"/><path d="M9 9h6M9 13h4"/>
-          </svg>
-        </div>
-        <div class="set-lbl">
-          {{ m.name }}
-          <div class="muted">{{ m.amount.toFixed(2) }} · due {{ m.due }}</div>
-        </div>
-        <div class="pill" :style="{ color: m.daysLeft < 0 ? '#d64545' : '#5a6678' }">
-          {{ m.daysLeft < 0 ? 'Overdue' : (m.daysLeft === 0 ? 'Today' : m.daysLeft + 'd') }}
-        </div>
-      </div>
-    </div>
-    <div class="card" v-else>
-      <div class="empty-note">No outstanding memos.</div>
-    </div>
-  </div>`,
-  setup(){
-    const draft = reactive({ name:'', amount:0, due:'' });
-    const memos = ref([]);
-
-    const daysLeft = (due) => {
-      if(!due) return 0;
-      const d = new Date(due + 'T00:00:00');
-      const today = new Date();
-      today.setHours(0,0,0,0);
-      return Math.round((d - today) / 86400000);
-    };
-
-    const add = () => {
-      if(!draft.name.trim() || !draft.due) return;
-      const days = daysLeft(draft.due);
-      memos.value.push({ name:draft.name.trim(), amount:Number(draft.amount)||0, due:draft.due, daysLeft:days });
-      draft.name = '';
-      draft.amount = 0;
-      draft.due = '';
-      if('Notification' in window && Notification.permission === 'default'){
-        try { Notification.requestPermission(); } catch(e) {}
-      }
-    };
-    const remove = (i) => memos.value.splice(i,1);
-
-    return { draft, memos, add, remove };
-  }
-};
-
-/* ---------- Settings ---------- */
-const SettingsPage = {
-  template:`
-  <div class="page-scroll">
-    <div class="page-head" style="margin-bottom:12px">
-      <div>
-        <div class="h1">Settings</div>
-        <div class="muted">Account and app information</div>
-      </div>
-    </div>
-
-    <div class="card set-list">
-      <router-link to="/checkin" class="set-row">
-        <div class="set-ic"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M8 3v4M16 3v4M3 11h18"/><path d="M9 15l2 2 4-4"/></svg></div>
-        <div class="set-lbl">Monthly Check-in</div>
-        <svg class="chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
-      </router-link>
-      <router-link to="/inbox" class="set-row">
-        <div class="set-ic"><svg viewBox="0 0 24 24"><path d="M4 6h16v12H4z"/><path d="M4 7l8 6 8-6"/></svg></div>
-        <div class="set-lbl">Inbox</div>
-        <svg class="chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
-      </router-link>
-      <router-link to="/feedback" class="set-row">
-        <div class="set-ic"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/></svg></div>
-        <div class="set-lbl">Feedback</div>
-        <svg class="chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
-      </router-link>
-    </div>
-
-    <div class="card set-list">
-      <router-link to="/privacy" class="set-row">
-        <div class="set-ic"><svg viewBox="0 0 24 24"><path d="M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6z"/></svg></div>
-        <div class="set-lbl">Privacy Policy</div>
-        <svg class="chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
-      </router-link>
-      <router-link to="/terms" class="set-row">
-        <div class="set-ic"><svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M9 12h7M9 16h5"/></svg></div>
-        <div class="set-lbl">Terms of Service</div>
-        <svg class="chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
-      </router-link>
-      <router-link to="/team" class="set-row">
-        <div class="set-ic"><svg viewBox="0 0 24 24"><circle cx="9" cy="9" r="3"/><path d="M3 20c0-3 2.7-5 6-5s6 2 6 5"/><circle cx="17" cy="8" r="2.4"/></svg></div>
-        <div class="set-lbl">About Team</div>
-        <svg class="chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
-      </router-link>
-      <a class="set-row" href="mailto:com.cukpcalculatorconvertor.app@gmail.com">
-        <div class="set-ic"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="3"/><path d="M4 7l8 6 8-6"/></svg></div>
-        <div class="set-lbl">Contact Us</div>
-        <svg class="chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
-      </a>
-    </div>
-
-    <div class="card">
-      <div class="set-row" style="padding:4px 2px">
-        <div class="set-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/></svg></div>
-        <div class="set-lbl">Version</div>
-        <div class="set-val">1.4.0</div>
-      </div>
-    </div>
-  </div>`
-};
-
-/* ---------- Privacy Policy ---------- */
-const PrivacyPage = {
-  components:{ SubHead },
-  template:`
-  <div class="page-scroll no-tab">
-    <sub-head title="Privacy Policy" sub="Effective upon first launch"></sub-head>
-    <div class="card article">
-      <p>This application processes information on your device. We designed it so that the core experience works without a network connection.</p>
-      <h3>Information we handle</h3>
-      <p>A device identifier derived from rendering characteristics is generated locally to distinguish sessions when the app checks for a privacy notice. Calculator inputs, memos, and check-in records stay in your browser storage.</p>
-      <h3>Network activity</h3>
-      <p>The app loads its interface libraries from a content delivery network. A single configuration request may be made on launch to determine whether a privacy notice exists. If that request fails, the app continues to the home screen without interruption.</p>
-      <h3>Your choices</h3>
-      <p>You can clear locally stored data at any time by clearing the browser storage for this app. Doing so removes your saved check-ins, memos, and calendar entries.</p>
-      <h3>Contact</h3>
-      <p>Questions about this policy can be sent to com.cukpcalculatorconvertor.app@gmail.com.</p>
-    </div>
-  </div>`
-};
-
-/* ---------- Terms of Service ---------- */
-const TermsPage = {
-  components:{ SubHead },
-  template:`
-  <div class="page-scroll no-tab">
-    <sub-head title="Terms of Service" sub="Please read before use"></sub-head>
-    <div class="card article">
-      <h3>Acceptance</h3>
-      <p>By using this application you agree to these terms. If you do not agree, please discontinue use.</p>
-      <h3>Informational purpose</h3>
-      <p>All figures, rankings, price series, and calculator outputs are provided for general information. They do not constitute investment advice, an offer, or a solicitation to buy or sell any security.</p>
-      <h3>No warranty</h3>
-      <p>The application is provided as-is. We make no guarantee regarding accuracy, completeness, or fitness for a particular purpose. Market data shown here is a fixed reference snapshot.</p>
-      <h3>Limitation of liability</h3>
-      <p>To the extent permitted by law, we are not liable for any loss arising from reliance on the content of this application.</p>
-      <h3>Changes</h3>
-      <p>These terms may be updated from time to time. Continued use after an update constitutes acceptance of the revised terms.</p>
-    </div>
-  </div>`
-};
-
-/* ---------- About Team ---------- */
-const TeamPage = {
-  components:{ SubHead },
-  template:`
-  <div class="page-scroll no-tab">
-    <sub-head title="About Team" sub="Who builds this"></sub-head>
-    <div class="card article">
-      <p>We are a small product studio focused on clear, fast, on-device financial utilities. Our team combines market research, interaction design, and front-end engineering.</p>
-      <h3>What we believe</h3>
-      <p>Tools should work instantly. They should be readable on a phone in one hand, and they should not require an account to be useful. Every calculation in this application runs locally.</p>
-      <h3>How we work</h3>
-      <p>Research informs the default values. Design keeps controls large enough to touch. Engineering keeps the interface light so the app opens quickly even on modest hardware.</p>
-      <h3>Reach us</h3>
-      <p>Feedback shapes the roadmap. Write to com.cukpcalculatorconvertor.app@gmail.com and a member of the team will read it.</p>
-    </div>
-  </div>`
-};
-
-/* ---------- Check-in ---------- */
-const CheckinPage = {
-  components:{ SubHead },
-  template:`
-  <div class="page-scroll no-tab">
-    <sub-head title="Monthly Check-in" sub="Record your visit"></sub-head>
-
-    <div class="card">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
-        <h2 class="h2" style="margin:0">{{ monthLabel }}</h2>
-        <span class="pill">{{ signedDays.length }} days</span>
-      </div>
-      <div class="cal-grid">
-        <div class="cal-dow" v-for="d in dow" :key="d">{{ d }}</div>
-        <div v-for="(c,i) in cells" :key="i" class="cal-day"
-             :class="{ empty:c.empty, today:c.today, signed:c.signed }">
-          <span v-if="!c.empty">{{ c.day }}</span>
-        </div>
-      </div>
-      <div class="cal-legend">
-        <span><i class="dot" style="background:#e0532f"></i>Checked in</span>
-        <span><i class="dot" style="background:#2f6bff"></i>Today</span>
-      </div>
-    </div>
-
-    <button class="btn btn-primary btn-block" @click="checkIn">Check in today</button>
-  </div>`,
-  setup(){
-    const router = useRouter();
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = now.getMonth();
-    const dow = ['S','M','T','W','T','F','S'];
-    const STORAGE_KEY = 'app.checkin.v1';
-
-    const signedDays = ref([]);
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if(raw){
-        const parsed = JSON.parse(raw);
-        if(parsed && parsed.year === year && parsed.month === month && Array.isArray(parsed.days)){
-          signedDays.value = parsed.days;
-        }
-      }
-    } catch(e) {}
-
-    const persist = () => {
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify({ year, month, days:signedDays.value }));
-      } catch(e) {}
-    };
-
-    const monthLabel = computed(() => new Date(year, month, 1).toLocaleString('en-US', { month:'long', year:'numeric' }));
-
-    const cells = computed(() => {
-      const first = new Date(year, month, 1).getDay();
-      const daysInMonth = new Date(year, month+1, 0).getDate();
-      const todayDate = now.getDate();
-      const out = [];
-      for(let i=0;i<first;i++) out.push({ empty:true });
-      for(let d=1; d<=daysInMonth; d++){
-        out.push({
-          empty:false, day:d,
-          today: d === todayDate,
-          signed: signedDays.value.includes(d)
+        };
+
+        // --- Home Component ---
+        const Home = {
+            template: `
+                <div class="page-container">
+                    <!-- Brand Header -->
+                    <div class="brand-header">
+                        <div class="brand-title">和璟AI</div>
+                        <div class="brand-subtitle">Intelligent Financial Analytics</div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="quick-actions">
+                        <router-link v-for="action in activeFeatures" :key="action.id" :to="action.route" class="action-card">
+                            <svg viewBox="0 0 24 24" v-html="action.icon"></svg>
+                            <span>{{ action.label }}</span>
+                        </router-link>
+                    </div>
+
+                    <!-- Stock List -->
+                    <div class="cyber-panel" style="padding: 0; overflow: hidden;">
+                        <div class="stock-list-header" style="padding: 12px var(--sp-sm) 8px;">
+                            <div>Symbol / Name</div>
+                            <div style="text-align: center;">Price</div>
+                            <div>Change</div>
+                        </div>
+                        <router-link v-for="stock in shuffledStocks" :key="stock.symbol" :to="'/stock/' + stock.symbol" class="stock-item">
+                            <div>
+                                <div class="stock-symbol">{{ stock.symbol }}</div>
+                                <div class="stock-name">{{ stock.name }}</div>
+                            </div>
+                            <div class="stock-price">{{ stock.price.toFixed(2) }}</div>
+                            <div class="stock-change" :class="stock.change >= 0 ? 'up' : 'down'">
+                                {{ stock.change >= 0 ? '+' : '' }}{{ stock.change.toFixed(2) }}%
+                            </div>
+                        </router-link>
+                    </div>
+                </div>
+            `,
+            setup() {
+                const shuffledStocks = ref([]);
+                onMounted(() => {
+                    // Shuffle display order only
+                    shuffledStocks.value = [...STOCKS_DATA].sort(() => 0.5 - Math.random());
+                });
+                return { activeFeatures: ACTIVE_FEATURES, shuffledStocks };
+            }
+        };
+
+        // --- Stock Detail Component ---
+        const StockDetail = {
+            template: `
+                <div class="page-container no-tab">
+                    <div class="page-header">
+                        <button class="back-btn" @click="$router.back()">
+                            <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+                            Back
+                        </button>
+                    </div>
+                    
+                    <div v-if="stock" class="cyber-panel">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: var(--sp-md);">
+                            <div>
+                                <div style="font-size: 24px; font-weight: 800; color: var(--accent-neon-cyan);">{{ stock.symbol }}</div>
+                                <div style="font-size: 12px; color: var(--text-muted);">{{ stock.name }}</div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="font-size: 28px; font-weight: 700;">{{ stock.price.toFixed(2) }}</div>
+                                <div :class="stock.change >= 0 ? 'neon-text-orange' : 'neon-text-cyan'" style="font-weight: 700; font-size: 14px;">
+                                    {{ stock.change >= 0 ? '+' : '' }}{{ stock.change.toFixed(2) }}%
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Price Chart (SVG) -->
+                        <div class="chart-container">
+                            <svg class="chart-svg" viewBox="0 0 300 150" preserveAspectRatio="none">
+                                <!-- Grid lines -->
+                                <line x1="0" y1="25" x2="300" y2="25" stroke="rgba(255,255,255,0.05)" stroke-width="1" />
+                                <line x1="0" y1="75" x2="300" y2="75" stroke="rgba(255,255,255,0.05)" stroke-width="1" />
+                                <line x1="0" y1="125" x2="300" y2="125" stroke="rgba(255,255,255,0.05)" stroke-width="1" />
+                                
+                                <!-- Area Gradient -->
+                                <defs>
+                                    <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="0%" stop-color="var(--accent-neon-cyan)" stop-opacity="0.3" />
+                                        <stop offset="100%" stop-color="var(--accent-neon-cyan)" stop-opacity="0.0" />
+                                    </linearGradient>
+                                </defs>
+                                
+                                <!-- Path -->
+                                <path :d="areaPath" fill="url(#chartGrad)" />
+                                <path :d="linePath" fill="none" stroke="var(--accent-neon-cyan)" stroke-width="2" stroke-linecap="round" />
+                                
+                                <!-- Data Points -->
+                                <circle v-for="(p, idx) in chartPoints" :key="idx" :cx="p.x" :cy="p.y" r="2" fill="var(--bg-dark)" stroke="var(--accent-neon-cyan)" stroke-width="1.5" />
+                            </svg>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 10px; color: var(--text-muted); margin-top: var(--sp-xs);">
+                            <span>30D Ago</span>
+                            <span>Today</span>
+                        </div>
+                    </div>
+                </div>
+            `,
+            setup() {
+                const route = useRoute();
+                const stock = computed(() => STOCKS_DATA.find(s => s.symbol === route.params.symbol));
+                
+                const chartPoints = computed(() => {
+                    if (!stock.value) return [];
+                    const basePrice = stock.value.price;
+                    const points = [];
+                    let current = basePrice * 0.95; // Start slightly lower
+                    for (let i = 0; i < 30; i++) {
+                        // Random walk
+                        current += (Math.random() - 0.45) * (basePrice * 0.02);
+                        points.push(current);
+                    }
+                    // Force last point to be exact current price
+                    points[29] = basePrice;
+                    
+                    const min = Math.min(...points);
+                    const max = Math.max(...points);
+                    const range = max - min || 1;
+                    
+                    return points.map((val, i) => {
+                        const x = (i / 29) * 300;
+                        // Dynamic Y-axis with padding (10% top/bottom)
+                        const paddedMin = min - range * 0.1;
+                        const paddedMax = max + range * 0.1;
+                        const paddedRange = paddedMax - paddedMin;
+                        const y = 150 - ((val - paddedMin) / paddedRange) * 150;
+                        return { x, y };
+                    });
+                });
+
+                const linePath = computed(() => {
+                    if (chartPoints.value.length === 0) return '';
+                    return chartPoints.value.map((p, i) => (i === 0 ? 'M' : 'L') + p.x + ' ' + p.y).join(' ');
+                });
+
+                const areaPath = computed(() => {
+                    if (chartPoints.value.length === 0) return '';
+                    const line = linePath.value;
+                    return line + ` L300 150 L0 150 Z`;
+                });
+
+                return { stock, chartPoints, linePath, areaPath };
+            }
+        };
+
+        // --- Top Gainers (and generic list page) ---
+        const StockListPage = {
+            template: `
+                <div class="page-container no-tab">
+                    <div class="page-header">
+                        <button class="back-btn" @click="$router.back()">
+                            <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+                            Back
+                        </button>
+                        <div class="page-title">{{ title }}</div>
+                    </div>
+                    
+                    <div class="cyber-panel" style="padding: 0; overflow: hidden;">
+                         <div class="stock-list-header" style="padding: 12px var(--sp-sm) 8px;">
+                            <div>Symbol / Name</div>
+                            <div style="text-align: center;">Price</div>
+                            <div>Change</div>
+                        </div>
+                        <router-link v-for="stock in listStocks" :key="stock.symbol" :to="'/stock/' + stock.symbol" class="stock-item">
+                            <div>
+                                <div class="stock-symbol">{{ stock.symbol }}</div>
+                                <div class="stock-name">{{ stock.name }}</div>
+                            </div>
+                            <div class="stock-price">{{ stock.price.toFixed(2) }}</div>
+                            <div class="stock-change" :class="stock.change >= 0 ? 'up' : 'down'">
+                                {{ stock.change >= 0 ? '+' : '' }}{{ stock.change.toFixed(2) }}%
+                            </div>
+                        </router-link>
+                    </div>
+                </div>
+            `,
+            setup() {
+                const route = useRoute();
+                const title = computed(() => {
+                    const map = {
+                        '/gainers': 'Top Gainers',
+                        '/losers': 'Top Losers',
+                        '/active': 'Most Active',
+                        '/potential': 'Potential',
+                        '/picks': "Today's Picks",
+                        '/notrec': 'Not Recommended',
+                        '/watchlist': 'Watchlist'
+                    };
+                    return map[route.path] || 'Stocks';
+                });
+                
+                const listStocks = computed(() => {
+                    let count = 10;
+                    if (route.path === '/losers') count = 5;
+                    if (route.path === '/active') count = 8;
+                    if (route.path === '/potential') count = 6;
+                    
+                    let sorted = [...STOCKS_DATA];
+                    if (route.path === '/gainers' || route.path === '/picks' || route.path === '/watchlist') {
+                        sorted.sort((a, b) => b.change - a.change);
+                    } else if (route.path === '/losers' || route.path === '/notrec') {
+                        sorted.sort((a, b) => a.change - b.change);
+                    } else if (route.path === '/active') {
+                        sorted.sort(() => 0.5 - Math.random());
+                    }
+                    return sorted.slice(0, count);
+                });
+                
+                return { title, listStocks };
+            }
+        };
+
+        // --- Guide Component ---
+        const Guide = {
+            template: `
+                <div class="page-container no-tab">
+                    <div class="page-header">
+                        <button class="back-btn" @click="$router.back()">
+                            <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+                            Back
+                        </button>
+                        <div class="page-title">Market Guide</div>
+                    </div>
+                    
+                    <div class="cyber-panel content-box">
+                        <h4>Understanding Market Volatility</h4>
+                        <p>Market volatility is a statistical measure of the dispersion of returns for a given security or market index. It represents the degree of variation of a trading price series over time.</p>
+                        <p>When volatility is high, prices can change dramatically over a short time period in either direction. This presents both significant risks and opportunities for investors.</p>
+                        <h4>Key Strategies</h4>
+                        <p>1. <strong>Diversification:</strong> Spreading investments across various asset classes to reduce risk.</p>
+                        <p>2. <strong>Dollar-Cost Averaging:</strong> Investing a fixed amount at regular intervals, reducing the impact of volatility.</p>
+                        <p>3. <strong>Long-Term Focus:</strong> Avoiding emotional decisions based on short-term market fluctuations.</p>
+                        <p>Always conduct thorough research or consult a financial advisor before making investment decisions.</p>
+                    </div>
+                </div>
+            `
+        };
+
+        // --- Toolbox Component ---
+        const Toolbox = {
+            template: `
+                <div class="page-container">
+                    <div class="page-header">
+                        <div class="page-title" style="font-size: 24px; background: linear-gradient(90deg, var(--accent-neon-cyan), var(--accent-neon-orange)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Toolbox</div>
+                    </div>
+                    
+                    <div class="tool-grid">
+                        <router-link to="/tool/dca" class="tool-card">
+                            <h3>DCA Calculator</h3>
+                            <p>Calculate cost averaging and profit thresholds.</p>
+                        </router-link>
+                        <router-link to="/tool/loan" class="tool-card">
+                            <h3>Loan Calculator</h3>
+                            <p>Equal principal and interest repayment schedule.</p>
+                        </router-link>
+                        <router-link to="/tool/password" class="tool-card">
+                            <h3>Password Strength</h3>
+                            <p>Check security level and MD5 hash.</p>
+                        </router-link>
+                    </div>
+                </div>
+            `
+        };
+
+        // --- DCA Tool ---
+        const DcaTool = {
+            template: `
+                <div class="page-container no-tab">
+                    <div class="page-header">
+                        <button class="back-btn" @click="$router.back()">
+                            <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+                            Back
+                        </button>
+                        <div class="page-title">DCA Profit-Taking</div>
+                    </div>
+                    <div class="cyber-panel">
+                        <label class="cyber-label">Cost Basis per Share</label>
+                        <input type="number" v-model="cost" class="cyber-input mb-md" placeholder="0.00" />
+                        
+                        <label class="cyber-label">Number of Shares</label>
+                        <input type="number" v-model="shares" class="cyber-input mb-md" placeholder="0" />
+                        
+                        <label class="cyber-label">Profit Threshold (%)</label>
+                        <input type="number" v-model="threshold" class="cyber-input mb-md" placeholder="10" />
+                        
+                        <div style="border-top: 1px solid rgba(0,243,255,0.2); padding-top: var(--sp-md); margin-top: var(--sp-md);">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: var(--sp-xs);">
+                                <span style="color: var(--text-muted);">Total Cost:</span>
+                                <span style="font-weight: 600;">{{ (cost * shares).toFixed(2) }}</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: var(--sp-xs);">
+                                <span style="color: var(--text-muted);">Target Price:</span>
+                                <span style="font-weight: 600; color: var(--accent-neon-orange);">{{ targetPrice.toFixed(2) }}</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between;">
+                                <span style="color: var(--text-muted);">Target Profit:</span>
+                                <span style="font-weight: 600; color: var(--accent-neon-cyan);">{{ targetProfit.toFixed(2) }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `,
+            setup() {
+                const cost = ref(100);
+                const shares = ref(10);
+                const threshold = ref(10);
+                
+                const targetPrice = computed(() => cost.value * (1 + threshold.value / 100));
+                const targetProfit = computed(() => (targetPrice.value - cost.value) * shares.value);
+                
+                return { cost, shares, threshold, targetPrice, targetProfit };
+            }
+        };
+
+        // --- Loan Tool ---
+        const LoanTool = {
+            template: `
+                <div class="page-container no-tab">
+                    <div class="page-header">
+                        <button class="back-btn" @click="$router.back()">
+                            <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+                            Back
+                        </button>
+                        <div class="page-title">Loan Calculator</div>
+                    </div>
+                    <div class="cyber-panel">
+                        <label class="cyber-label">Loan Amount</label>
+                        <input type="number" v-model="amount" class="cyber-input mb-md" placeholder="10000" />
+                        
+                        <label class="cyber-label">Annual Interest Rate (%)</label>
+                        <input type="number" v-model="rate" class="cyber-input mb-md" placeholder="5" />
+                        
+                        <label class="cyber-label">Term (Months)</label>
+                        <input type="number" v-model="term" class="cyber-input mb-md" placeholder="12" />
+                        
+                        <div style="border-top: 1px solid rgba(0,243,255,0.2); padding-top: var(--sp-md); margin-top: var(--sp-md);">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: var(--sp-xs);">
+                                <span style="color: var(--text-muted);">Monthly Payment:</span>
+                                <span style="font-weight: 600; color: var(--accent-neon-orange);">{{ monthlyPayment.toFixed(2) }}</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between;">
+                                <span style="color: var(--text-muted);">Total Interest:</span>
+                                <span style="font-weight: 600; color: var(--accent-neon-cyan);">{{ totalInterest.toFixed(2) }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `,
+            setup() {
+                const amount = ref(10000);
+                const rate = ref(5);
+                const term = ref(12);
+                
+                const monthlyPayment = computed(() => {
+                    const r = (rate.value / 100) / 12;
+                    if (r === 0) return amount.value / term.value;
+                    return (amount.value * r * Math.pow(1 + r, term.value)) / (Math.pow(1 + r, term.value) - 1);
+                });
+                
+                const totalInterest = computed(() => (monthlyPayment.value * term.value) - amount.value);
+                
+                return { amount, rate, term, monthlyPayment, totalInterest };
+            }
+        };
+
+        // --- Password Tool ---
+        const PasswordTool = {
+            template: `
+                <div class="page-container no-tab">
+                    <div class="page-header">
+                        <button class="back-btn" @click="$router.back()">
+                            <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+                            Back
+                        </button>
+                        <div class="page-title">Password Strength</div>
+                    </div>
+                    <div class="cyber-panel">
+                        <label class="cyber-label">Enter Password</label>
+                        <input type="text" v-model="password" class="cyber-input mb-md" placeholder="Type here..." />
+                        
+                        <div style="margin-bottom: var(--sp-md);">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: var(--sp-xs);">
+                                <span style="color: var(--text-muted);">Strength:</span>
+                                <span :style="{ color: strengthColor, fontWeight: 'bold' }">{{ strengthLabel }}</span>
+                            </div>
+                            <div style="height: 6px; background: var(--bg-dark); border-radius: 3px; overflow: hidden;">
+                                <div :style="{ width: strengthPercent + '%', height: '100%', background: strengthColor, transition: 'all 0.3s' }"></div>
+                            </div>
+                        </div>
+
+                        <label class="cyber-label">MD5 Hash</label>
+                        <div style="background: rgba(0,0,0,0.5); padding: 10px; border-radius: var(--radius-sm); font-family: monospace; font-size: 12px; word-break: break-all; color: var(--accent-neon-cyan);">
+                            {{ md5Hash || '...' }}
+                        </div>
+                    </div>
+                </div>
+            `,
+            setup() {
+                const password = ref('');
+                
+                const md5Hash = computed(() => {
+                    if (!password.value) return '';
+                    return md5(password.value);
+                });
+                
+                const strengthPercent = computed(() => {
+                    const p = password.value;
+                    if (!p) return 0;
+                    let score = 0;
+                    if (p.length > 8) score += 25;
+                    if (p.length > 12) score += 15;
+                    if (/[A-Z]/.test(p)) score += 20;
+                    if (/[0-9]/.test(p)) score += 20;
+                    if (/[^A-Za-z0-9]/.test(p)) score += 20;
+                    return Math.min(100, score);
+                });
+                
+                const strengthLabel = computed(() => {
+                    const s = strengthPercent.value;
+                    if (s === 0) return 'None';
+                    if (s < 40) return 'Weak';
+                    if (s < 70) return 'Medium';
+                    return 'Strong';
+                });
+                
+                const strengthColor = computed(() => {
+                    const s = strengthPercent.value;
+                    if (s < 40) return '#ff00ff'; // Pink/Red
+                    if (s < 70) return 'var(--accent-neon-orange)';
+                    return 'var(--accent-neon-green)';
+                });
+                
+                return { password, md5Hash, strengthPercent, strengthLabel, strengthColor };
+            }
+        };
+
+        // --- Settings Component ---
+        const Settings = {
+            template: `
+                <div class="page-container">
+                    <div class="page-header">
+                        <div class="page-title" style="font-size: 24px; background: linear-gradient(90deg, var(--accent-neon-orange), var(--accent-neon-cyan)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Settings</div>
+                    </div>
+                    
+                    <div class="settings-group">
+                        <router-link to="/settings/privacy" class="settings-item">
+                            <div class="settings-item-left">
+                                <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg>
+                                <span>Privacy Policy</span>
+                            </div>
+                            <div class="settings-item-arrow">›</div>
+                        </router-link>
+                        <router-link to="/settings/terms" class="settings-item">
+                            <div class="settings-item-left">
+                                <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
+                                <span>Terms of Service</span>
+                            </div>
+                            <div class="settings-item-arrow">›</div>
+                        </router-link>
+                        <a href="mailto:com.cukpcalculatorconvertor.app@gmail.com" class="settings-item">
+                            <div class="settings-item-left">
+                                <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+                                <span>Contact Us</span>
+                            </div>
+                            <div class="settings-item-arrow">›</div>
+                        </a>
+                    </div>
+                    
+                    <div class="settings-group">
+                        <div class="settings-item">
+                            <div class="settings-item-left">
+                                <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+                                <span>Version</span>
+                            </div>
+                            <span style="color: var(--text-muted); font-size: 12px;">1.0.0</span>
+                        </div>
+                    </div>
+                </div>
+            `
+        };
+
+        // --- Generic Content Page (Privacy, Terms) ---
+        const ContentPage = {
+            template: `
+                <div class="page-container no-tab">
+                    <div class="page-header">
+                        <button class="back-btn" @click="$router.back()">
+                            <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+                            Back
+                        </button>
+                        <div class="page-title">{{ title }}</div>
+                    </div>
+                    <div class="cyber-panel content-box">
+                        <div v-html="content"></div>
+                    </div>
+                </div>
+            `,
+            setup() {
+                const route = useRoute();
+                const title = computed(() => route.path.includes('privacy') ? 'Privacy Policy' : 'Terms of Service');
+                
+                const content = computed(() => {
+                    if (route.path.includes('privacy')) {
+                        return `
+                            <h4>Data Collection</h4>
+                            <p>We collect minimal information necessary to provide our services. Your financial data entered into local tools is never transmitted to our servers.</p>
+                            <h4>Device Information</h4>
+                            <p>We may generate an anonymous device fingerprint to ensure secure access and prevent fraud. This fingerprint does not personally identify you.</p>
+                            <h4>Third-Party Services</h4>
+                            <p>We do not sell your personal information to third parties.</p>
+                        `;
+                    } else {
+                        return `
+                            <h4>Acceptance of Terms</h4>
+                            <p>By accessing and using this application, you accept and agree to be bound by the terms and provision of this agreement.</p>
+                            <h4>Use License</h4>
+                            <p>Permission is granted to temporarily use this application for personal, non-commercial transitory viewing only.</p>
+                            <h4>Disclaimer</h4>
+                            <p>The materials on this application are provided on an 'as is' basis. We make no warranties, expressed or implied, and hereby disclaim and negate all other warranties.</p>
+                        `;
+                    }
+                });
+                
+                return { title, content };
+            }
+        };
+
+        // ==================== ROUTER ====================
+        const routes = [
+            { path: '/', redirect: '/home' }, // Loading handled separately
+            { path: '/home', component: Home },
+            { path: '/toolbox', component: Toolbox },
+            { path: '/settings', component: Settings },
+            
+            // Sub-pages
+            { path: '/stock/:symbol', component: StockDetail, meta: { hideTab: true } },
+            { path: '/gainers', component: StockListPage, meta: { hideTab: true } },
+            { path: '/losers', component: StockListPage, meta: { hideTab: true } },
+            { path: '/active', component: StockListPage, meta: { hideTab: true } },
+            { path: '/potential', component: StockListPage, meta: { hideTab: true } },
+            { path: '/picks', component: StockListPage, meta: { hideTab: true } },
+            { path: '/notrec', component: StockListPage, meta: { hideTab: true } },
+            { path: '/watchlist', component: StockListPage, meta: { hideTab: true } },
+            { path: '/guide', component: Guide, meta: { hideTab: true } },
+            
+            // Tools
+            { path: '/tool/dca', component: DcaTool, meta: { hideTab: true } },
+            { path: '/tool/loan', component: LoanTool, meta: { hideTab: true } },
+            { path: '/tool/password', component: PasswordTool, meta: { hideTab: true } },
+            
+            // Settings
+            { path: '/settings/privacy', component: ContentPage, meta: { hideTab: true } },
+            { path: '/settings/terms', component: ContentPage, meta: { hideTab: true } },
+            
+            // Catch-all
+            { path: '/:pathMatch(.*)*', redirect: '/home' }
+        ];
+
+        const router = createRouter({
+            history: createWebHashHistory(),
+            routes
         });
-      }
-      return out;
-    });
 
-    const checkIn = () => {
-      const d = now.getDate();
-      if(!signedDays.value.includes(d)){
-        signedDays.value = signedDays.value.concat(d).sort((a,b)=>a-b);
-        persist();
-      }
-      showToast('Check-in recorded');
-      router.push('/settings');
-    };
+        // ==================== MAIN APP ====================
+        const App = {
+            template: `
+                <div id="app-root">
+                    <!-- Loading State -->
+                    <Loading v-if="isLoading" />
+                    
+                    <!-- Main App Layout -->
+                    <template v-else>
+                        <router-view v-slot="{ Component }">
+                            <transition name="fade" mode="out-in">
+                                <component :is="Component" :key="$route.path" />
+                            </transition>
+                        </router-view>
 
-    return { dow, cells, monthLabel, signedDays, checkIn };
-  }
-};
+                        <!-- Tab Bar -->
+                        <div class="tab-bar" v-if="!$route.meta.hideTab">
+                            <router-link to="/home" class="tab-item" active-class="active">
+                                <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+                                <span>Home</span>
+                            </router-link>
+                            <router-link to="/toolbox" class="tab-item" active-class="active">
+                                <svg viewBox="0 0 24 24"><path d="M22 9V7h-2V5c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-2h2v-2h-2v-2h2v-2h-2V9h2zm-4 10H4V5h14v14zM6 13h5v4H6zm6-6h4v3h-4zm0 5h4v5h-4zm-6-5h5v3H6z"/></svg>
+                                <span>Toolbox</span>
+                            </router-link>
+                            <router-link to="/settings" class="tab-item" active-class="active">
+                                <svg viewBox="0 0 24 24"><path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/></svg>
+                                <span>Settings</span>
+                            </router-link>
+                        </div>
+                    </template>
+                </div>
+            `,
+            setup() {
+                const isLoading = ref(true);
+                const toastMessage = ref('');
 
-/* ---------- Feedback ---------- */
-const FeedbackPage = {
-  components:{ SubHead },
-  template:`
-  <div class="page-scroll no-tab">
-    <sub-head title="Feedback" sub="Tell us what to improve"></sub-head>
-    <div class="card">
-      <div class="field">
-        <label>Subject</label>
-        <input class="input" v-model="title" placeholder="Short summary" maxlength="80">
-      </div>
-      <div class="field">
-        <label>Message</label>
-        <textarea class="input" v-model="body" placeholder="Describe your experience" maxlength="600"></textarea>
-      </div>
-      <button class="btn btn-primary btn-block" :disabled="!canSend" @click="send">Send feedback</button>
-      <div class="muted" style="margin-top:10px;text-align:center">Both fields are required.</div>
-    </div>
-  </div>`,
-  setup(){
-    const router = useRouter();
-    const title = ref('');
-    const body = ref('');
-    const canSend = computed(() => title.value.trim().length > 0 && body.value.trim().length > 0);
+                const showToast = (msg) => {
+                    toastMessage.value = msg;
+                    setTimeout(() => {
+                        toastMessage.value = '';
+                    }, 2000);
+                };
 
-    const send = () => {
-      if(!canSend.value) return;
-      title.value = '';
-      body.value = '';
-      showToast('Feedback sent');
-      router.push('/settings');
-    };
+                // Provide toast to all children
+                Vue.provide('toast', showToast);
 
-    return { title, body, canSend, send };
-  }
-};
+                // Simulate initial loading delay / privacy check
+                onMounted(() => {
+                    // The Loading component handles the actual logic and router redirection.
+                    // We just need to hide the loading screen after a short delay to allow the router to settle.
+                    setTimeout(() => {
+                        isLoading.value = false;
+                    }, 800);
+                });
 
-/* ---------- Inbox ---------- */
-const InboxPage = {
-  components:{ SubHead },
-  template:`
-  <div class="page-scroll no-tab">
-    <sub-head title="Inbox" sub="Messages"></sub-head>
-    <div class="card set-list">
-      <div v-for="m in messages" :key="m.id" class="set-row" @click="open = m">
-        <div class="set-ic"><svg viewBox="0 0 24 24"><path d="M4 6h16v12H4z"/><path d="M4 7l8 6 8-6"/></svg></div>
-        <div class="set-lbl">{{ m.title }}</div>
-        <svg class="chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
-      </div>
-    </div>
+                return { isLoading, toastMessage };
+            }
+        };
 
-    <div v-if="open" class="modal-mask" @click.self="open = null">
-      <div class="modal">
-        <h3>{{ open.title }}</h3>
-        <p>{{ open.body }}</p>
-        <button class="btn btn-primary btn-block" @click="open = null">Close</button>
-      </div>
-    </div>
-  </div>`,
-  setup(){
-    const messages = ref([
-      {
-        id:1,
-        title:'Welcome',
-        body:'Thanks for opening 和璟AI. The Market Snapshot on Home refreshes its display order each time you arrive, so the list never feels static. Explore the Toolbox for calculators that run entirely on your device, and use Settings to keep track of check-ins and memos. We read every note sent through Feedback.'
-      }
-    ]);
-    const open = ref(null);
-    return { messages, open };
-  }
-};
+        // Add Loading as a component
+        App.components = { Loading };
 
-/* ==========================================================================
-   TOAST (global, tiny event bus)
-   ========================================================================== */
-const toastState = ref('');
-let toastTimer = null;
-function showToast(msg){
-  toastState.value = msg;
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => { toastState.value = ''; }, 1800);
-}
-
-/* ==========================================================================
-   ROUTES
-   ========================================================================== */
-const routes = [
-  { path:'/', redirect:'/loading' },
-  { path:'/loading', component:LoadingPage, meta:{ hideTab:true } },
-  { path:'/home', component:HomePage },
-  { path:'/rank/:kind', component:RankPage, meta:{ hideTab:true } },
-  { path:'/guide', component:GuidePage, meta:{ hideTab:true } },
-  { path:'/stock/:symbol', component:StockDetailPage, meta:{ hideTab:true } },
-  { path:'/toolbox', component:ToolboxPage },
-  { path:'/tool/dca', component:DcaPage, meta:{ hideTab:true } },
-  { path:'/tool/calendar', component:CalendarToolPage, meta:{ hideTab:true } },
-  { path:'/tool/loan', component:LoanPage, meta:{ hideTab:true } },
-  { path:'/tool/profit', component:ProfitPage, meta:{ hideTab:true } },
-  { path:'/tool/reverse', component:ReversePage, meta:{ hideTab:true } },
-  { path:'/tool/password', component:PasswordPage, meta:{ hideTab:true } },
-  { path:'/tool/credit', component:CreditPage, meta:{ hideTab:true } },
-  { path:'/settings', component:SettingsPage },
-  { path:'/privacy', component:PrivacyPage, meta:{ hideTab:true } },
-  { path:'/terms', component:TermsPage, meta:{ hideTab:true } },
-  { path:'/team', component:TeamPage, meta:{ hideTab:true } },
-  { path:'/checkin', component:CheckinPage, meta:{ hideTab:true } },
-  { path:'/feedback', component:FeedbackPage, meta:{ hideTab:true } },
-  { path:'/inbox', component:InboxPage, meta:{ hideTab:true } },
-  { path:'/:pathMatch(.*)*', redirect:'/home' }
-];
-
-const router = createRouter({
-  history: createWebHashHistory(),
-  routes,
-  scrollBehavior(){ return { top:0 }; }
-});
-
-/* ==========================================================================
-   ROOT APP (tab bar + view transition + toast)
-   ========================================================================== */
-const App = {
-  template:`
-  <div class="app-shell">
-    <router-view v-slot="{ Component }">
-      <transition name="fade-slide" mode="out-in">
-        <component :is="Component" :key="$route.fullPath" />
-      </transition>
-    </router-view>
-
-    <nav class="tabbar" v-if="showTab">
-      <router-link v-for="t in tabs" :key="t.path" :to="t.path" class="tab-item"
-                   :class="{ active: isActive(t.path) }">
-        <span class="tab-ic-wrap" v-html="t.icon"></span>
-        <span>{{ t.label }}</span>
-      </router-link>
-    </nav>
-
-    <div v-if="toast" class="toast">{{ toast }}</div>
-  </div>`,
-  setup(){
-    const route = useRoute();
-
-    const TABS = [
-      {
-        path:'/home', label:'Home',
-        icon:'<svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg>'
-      },
-      {
-        path:'/toolbox', label:'Toolbox',
-        icon:'<svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="3"/><path d="M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2"/><path d="M3 12h18"/></svg>'
-      },
-      {
-        path:'/settings', label:'Settings',
-        icon:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M19 12a7 7 0 00-.1-1.2l2-1.5-2-3.4-2.3.9a7 7 0 00-2-1.2L14 3h-4l-.5 2.6a7 7 0 00-2 1.2l-2.3-.9-2 3.4 2 1.5A7 7 0 005 12c0 .4 0 .8.1 1.2l-2 1.5 2 3.4 2.3-.9c.6.5 1.3.9 2 1.2L10 21h4l.5-2.6c.7-.3 1.4-.7 2-1.2l2.3.9 2-3.4-2-1.5c.1-.4.2-.8.2-1.2z"/></svg>'
-      }
-    ];
-
-    const showTab = computed(() => {
-      const p = route.path;
-      if(route.meta && route.meta.hideTab) return false;
-      if(p === '/loading' || p === '/') return false;
-      return TABS.some(t => p === t.path);
-    });
-
-    const isActive = (path) => route.path === path;
-
-    return { tabs:TABS, showTab, isActive, toast:toastState };
-  }
-};
-
-const app = createApp(App);
-app.use(router);
-app.mount('#app');
-</script>
+        const app = createApp(App);
+        app.use(router);
+        app.mount('#app');
+    </script>
 </body>
 </html>
